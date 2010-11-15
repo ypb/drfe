@@ -1,0 +1,58 @@
+YIAESH
+======
+
+What the fluck is it?
+---------------------
+
+Yiaesh Is An Explicit SHell. It's my messianic, misguided, blunderful attempt
+at conquering the world. But at the moment it's a fork of esh (easy shell) in
+order to implement a sort of GTD (get things done) scheme as a couple of new
+built-in commands. In truth it may never become anything more...
+
+The Plan
+--------
+
+As far as implementing anything as involved as a *nix shell in C I can be said
+to be an absolute newb. But I know a theoretical thing or two about "computing"
+in general and I know that a way from pressing a power button of your machine
+and getting to even the simplest CLI (command line interface) is non-trivial to
+put it nonchalantly. It depends on the whole computing environment as well as
+on what we actually want to achieve with our command prompt.
+
+But, because I also would like to play with several different ideas "inside"
+Yiaesh, I'd like to make it as general as possible splitting it into orthogonal
+components. So a tentative initial plan after getting the GTD environment up
+and running is to split Yiaesh into "jesz" (just executing something, zzzzz...)
+driver component which acts as an OS facing interface, a sort of virtual machine
+that gets to keep things running and "mnie" (mini neural injunctive environment)
+a prelude or an initial heap image responsible for the "rest" i.e. giving us an
+actual prompt or otherwise executing series of commands. Perhaps it's neither
+possible or prudent but I would like the first to be as primitive as not even
+having memory management capabilities and second only as smart as to provide
+some form of "read" and "print" primitives... but I honestly do not know how it
+will turn out.
+
+There are many disparate concerns that find its focus in a platonic idea of
+a shell. Main one being a plane of syntax and semantics. As it was esh attempted
+to be innovative and introduce an old idea of LISP into the scope of traditional
+*nix shell ecosystem. Being a Scheme weenie I found this very hopeful, but not
+quite "pure"... so a final goal may be creating a sort of lispy, data streaming
+and process oriented language on top of jesz/mnie (for all the non-Poles readers
+out-there "jesz mnie" means "you are eating me"), which bootstraps from some
+assembly/forthish sort of basics. Coming from Scheme there are two main things
+that may be of interest: macros and continuations, first as it shapes syntax of
+the language and second as it effects semantics of the processing it creates.
+I may try to look at Kernel (http://web.cs.wpi.edu/~jshutt/kernel.html) but
+it may turnout that demands of more terse (perhaps even pattern matching a la
+ML) syntax incorporating ideas from pi-calculus may be more befitting shell-
+like aims of the project. But that's pure vaporwareship and a very distant, and
+considering my skills wholly unrealistic, perspective.
+
+AUTHORS
+-------
+
+Ivan Tkatchev, ivantk AT yahoo DOT com, http://esh.netpedia.net
+  initial esh code base
+Michal Kowalski, sladegen AT gmail DOT com
+  stupid and lazy esh spooner
+

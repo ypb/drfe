@@ -1,0 +1,23 @@
+
+2010 11 13 06 24 42  UTC
+
+The idea of Yiaesh is born in the form of README file. Tossing initial
+prototype of GTD scheme in the form of shell script trying to use tdbtool.
+Spent last two days re-pondering what and how I want to achieve and I think
+I have an initial shape of implementation of the "historical snippets
+database" in my head. Now, C, baby, hawabanga, dude! Segment<carrier> lost.
+
+2010 11 14 07 57 08  UTC
+
+Looks like it's going to take loonger than my meager C skills envisioned it
+to me ;-} Basic init, eventcount, etc is in place and at the point of making
+ready to add atomos. At ~300 LOC I think it's ready for an initial commit, heh.
+We can fork it then into basic non-atomized events adding abstraction of "axis"
+access, versioning DB and the like. But first there is a need to describe
+what/how/why I want to implement lest it slips my mind and messy paper notes,
+again. As it is, now, main() simply passes everything to say(), so it should
+be easy to insert it into esh at any time, but while it's still not working it
+may as well remain an individial executable and a sort of poligon for further
+development. Calling it dereferencier (or simply DrFe) in the spirit of GTD and
+"snippets" application.
+

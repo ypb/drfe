@@ -1,0 +1,29 @@
+
+Dereferencier
+-------------
+
+Or DrFe in short. A GTD (in a very broad meaning of the acronym) and "snippets"
+command line application. Uses tdb (a bdb/gdbm clone from Samba) as hash store.
+
+Actually it's most certainly more about "snippets" than GTD so mentioning the
+former is probably a grave overstatement, but for the longest time I found
+"to-doing" generating lots of conceptual shards (shreds or perhaps chaff?-)
+which ultimately elude classification or their organization becomes a project
+in and of itself. Real life case is half bad as stacks of post-it notes or
+notebooks have materially irreducible logical structure, but virtual one
+(inside computer) while giving potentially infinite possibilities of "solving"
+the problem in fact creates so much freedom that in the end it all gets "lost".
+For example I've never found a way to effectively manage my bookmarks, I've
+tried org-mode, several time-management applications, but in the end when
+I wanted to remember some "snippet" relevant to something I've done some weeks
+ago and I haven't then foreseen that I may need this information later and
+it was not something that found its way to the top of a Google search grepping
+through my xclipboard files "saved the moment". Hurray for Luddite primitivism...
+
+DrFe is an attempt to index, manage and structure by centralizing into one
+"concepts name space" a set of textual blobs which in a very unpredictable
+manner may or may not have relation to each other over time. Additionally, I
+think that using CLI may help in escaping phenomenon of given abstract
+metaphor, as self-created by GUI, constricting manner of operation of each
+individual user.
+

@@ -1,0 +1,109 @@
+#!/usr/bin/env rc
+
+HEREXE=`{basename $0}
+HEROOT=$HOME/.herstory/tdb
+HERDATE=`{date -u '+%s.%N %Y %m %d %H %M %S'}
+HERFILES=(0.idx idx.0 1.idx idx.1 N.idx idx.N)
+
+nl=`` () {echo}
+
+fn sanity {
+   test -d $HEROOT || mkdir -p $HEROOT || exit 1
+   for (f in $HEROOT/^$HERFILES) {
+   	   # echo $f ;
+	   test -f $f || \
+	     echo create $f | tdbtool > /dev/null  || \
+		   exit 1 }
+}
+
+sanity
+
+fn usage {
+   echo '# '''$HEREXE cmds''' for '"'help'"''
+   echo '# usage: '^$HEREXE^' cmd [args ..]'
+}
+
+if (~ $#* 0) { usage ; exit 0 }
+
+# cmds
+
+commands=(cmds parrot stats say)
+
+fn cmds_help {
+   echo print short description for each command
+}
+
+fn cmds {
+   echo '# '''$HEREXE''' command - short help:'
+   for (c in $commands) {
+   	   help=$c^_help
+#	   echo $help
+#	   echo $$help
+	   if (whatis -f $help > /dev/null >[2=1]) {
+   	   	  echo '#' $c '-' `{ $help }
+	   	  }
+	   }
+   echo '#'
+}
+
+############## parrot
+
+fn parrot_help {
+   echo echo back args
+}
+
+fn parrot {
+   echo $*
+}
+
+########### say
+
+fn say_help {
+   echo tell her smth smth
+}
+
+fn her_date {
+   echo $HERDATE
+}
+
+fn add_atom {
+   parrot $0 $*
+   { echo show 0 ; } | tdbtool $HEROOT/idx.0
+	 echo $status
+}
+
+fn set_atom_count {
+   { echo store 0 $1 ; } | tdbtool $HEROOT/idx.0
+     echo $status
+}
+
+fn say {
+   echo `` ($nl) {her_date} $*
+   set_atom_count foo
+   echo `` ($nl) {add_atom $*}
+}
+
+############# stats
+
+fn stats_help {
+   echo list DB files
+}
+
+fn stats {
+   filez=`{find $HEROOT -type f | sort}
+#   echo $#filez
+   if (! ~ $#filez 0) {
+   	  ls -l $filez | sed s'|'$HEROOT'\/||'g
+	  }
+}
+
+### here we really go ###
+
+run=$1
+shift
+if (whatis -f $run > /dev/null >[2=1]) {
+   $run $*
+} else {
+  echo '# no such command: '$run
+  exit 1
+}
