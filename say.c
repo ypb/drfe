@@ -55,15 +55,20 @@ int say_init(char *dir)
 
   status = stat(dir, &buffer) ;
 
+#ifdef _SDEBUG
+  printf("# say_init: stat(ROOTPATH, &buffer)=%i\n", status) ;
+#endif
+
   if (status == -1) {
 	err = errno ;
 	switch (err) {
 	case ENOENT:
-	  status = mkdir(dir, S_IRWXU | S_IRGRP | S_IXGRP ) ;
+	  status = mkdir(dir, S_IRWXU) ; /* | S_IRGRP | S_IXGRP | S_IRWXO ) ; very restrictive */
 	  if (status == -1) {
 		perror("# say_init: mkdir ROOTPATH failed") ;
 		return ret ;
 	  }
+	  /* oh, and for a moment i thought struct stat st_mode updates itself dynamically, LOL */
 	  status = stat(dir, &buffer) ;
 	  break;
 	default:
@@ -72,8 +77,12 @@ int say_init(char *dir)
 	}
   }
 
-  if (! S_ISDIR(buffer.st_mode)) {
-	printf("# say_init: ROOTPATH=%s not a directory\n", dir) ;
+#ifdef _SDEBUG
+  printf("# say_init: ROOTPATH st_mode is %o\n", buffer.st_mode) ;
+#endif
+
+  if (! (S_ISDIR(buffer.st_mode))) {
+	printf("# say_init: ROOTPATH(%s) not a directory\n", dir) ;
 	return ret ;
   }
 
@@ -231,6 +240,7 @@ int say_add_event(int argc, char *argv[])
   /* EH, that's not so simple since this ALSO must work if we modified DB otherwise... */
   if (say_sync_eventcount('s', &count) == -1)
 	return ret ;
+  /* and must not be reached if argc==0, TOFIX */
 
   printf("# say_add_event: eventcount=%i eventdata=%s\n", count, buf) ;
   ret = 0 ;
@@ -251,6 +261,8 @@ int say(int argc, char *argv[])
 #endif
 
   status = say_init(NULL) ;
+  if (status == -1)
+	return 128 ;
 #ifdef _SDEBUG
   say_test(status) ;
 #endif
