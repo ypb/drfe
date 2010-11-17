@@ -1,12 +1,24 @@
 
+#include <inttypes.h>
+
+/* that's silly that tdb.h requires this too explicitly... */
+#include <sys/types.h>
 #include <tdb.h>
+
+/* to typedef the rest or not to typedef */
+typedef unsigned char uchar_t ;
 
 /* SHRUG */
 
-/* a string? */
+/* a strings? */
 struct blob {
   uint32_t len ;
   uchar_t *dat ;
+} ;
+
+struct blobs {
+  uint32_t len ;
+  uchar_t **dat ;
 } ;
 
 /* a record? */
@@ -19,7 +31,7 @@ struct kons {
 struct rack {
   uint32_t index ;
   uint32_t len ;
-  struct kons dat[] ;
+  struct kons *dat ;
   struct rack *next ;
 } ;
 
@@ -28,7 +40,7 @@ struct registry {
   struct blob name ;
   struct registry *next ;
   struct rack entry ;
-  TDB_CONTEXT store ;
+  TDB_CONTEXT *store ;
 } ;
 
 /* a (volatile?) contents... */
@@ -46,4 +58,6 @@ struct db {
   struct blob path ;
   struct registry *first ;
 } ;
+
+struct db* store_open_fiber(char*, struct blobs) ;
 

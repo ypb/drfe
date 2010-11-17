@@ -10,6 +10,8 @@
 
 #include <tdb.h>
 
+#include "store.h"
+
 #define ROOTPATH "store"
 #define DATABASE "events.tdb"
 
@@ -25,6 +27,8 @@ char *db_names[] = {
   "meta.tdb",
   "info.tdb"
 } ;
+
+struct blobs reg_names = { 6, db_names } ;
 
 /*
   above should be of the same length as below on account of *pitering
@@ -85,6 +89,10 @@ int say_init(char *dir)
 	printf("# say_init: ROOTPATH(%s) not a directory\n", dir) ;
 	return ret ;
   }
+
+  struct db *temp = store_open_fiber(dir, reg_names) ;
+  /* LOL, shouldn't that be a SEGFAULT? too little stack use? */
+  printf("# say_init: db->path.dat=%s db->path.len=%i\n", temp->path.dat, temp->path.len) ;
 
   return say_open_fiber() ;
 }
