@@ -60,4 +60,5 @@ struct db {
 } ;
 
 struct db* store_open_fiber(char*, struct blobs) ;
+void store_lsns(struct db*) ;
 
