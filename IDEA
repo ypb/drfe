@@ -1,5 +1,5 @@
 
-### after thinking it through i think it's really TRIVIAL POS ;-(
+### after thinking it through i think it's really TRIVIAL POS ;-( double-linked Van Wijngaarden grammar, but of course "I" knew that already, question is if by doing it "Me" gets it...
 
 # "atomic" event
 AEVENT: cdata
@@ -19,17 +19,17 @@ EVENT: AEVENT*
 
 ANYWAYZ: several important points...
 
-a. event: contains EVENTSs (aka lines of snippets) encoded with their AIDs (WHICH ones...?) previous...!?!?!1!!?!!?!
+a. event: contains EVENTs (aka lines of snippets) encoded with their AIDs (WHICH ones...?) previous...!?!?!1!!?!!?!
 b. head: (aka root:) encodes cdata of an AEVENT and its first AID (and so also first EID...)
-c. atomic: (aka leave:) indexes all appearances of AEVENTS (with their root and current EID
+c. atomic: (aka leave:) indexes all appearances of AEVENTs (with their root and current EID
 d. tail: (aka top:) tracks last AID of a HID...
-e. meta: are "compoud" AEVENTS which are defined by an EVENT and surrounding them there other "simple" or "compund" AEVENTS, but they are recognizable as such by the fact that "inversion" on root is an identity i.e. key = get(key) and so they need their own "Table" but are defined by context in the atomic: (aka leave:) BUT otherwise they are trated just like simple AEVENTS...
+e. meta: are "compound" AEVENTS which are defined by an EVENT and surrounding them there other "simple" or "compound" AEVENTS, but they are recognizable as such by the fact that "inversion" on root is an identity i.e. key = get(key) and so they need their own "Table" but are defined by context in the atomic: (aka leave:) BUT otherwise they are treated just like simple AEVENTS...
 
 f. we want to achieve "threading" i.e. linked list from head: through atomic: to tail: so we can:
  - quickly decode any event into concrete aevent's cdata
  - quickly move back and forth in history
  - quickly locate all mentions of any aevent
- - quickly jump between different encodings of meta aevents depending on current context of the commandline e.g. if we are "holding" i.e. working on a meta tag of 'EVENT = "TODO" "something"' and we've created snippets containing "something"...
+ - quickly jump between different encodings of meta aevents depending on current context of the command-line e.g. if we are "holding" i.e. working on a meta tag of 'EVENT = "TODO" "something"' and we've created snippets containing "something"...
 
 WOW... and two days ago it made perfect sense ;-}
 
@@ -40,27 +40,27 @@ Well, it still does, but I'm slightly foggy due to spending a day on completely 
 NOTES of INITIAL IDEA:
 
 0. table: R1 D1
-R as in refernce, D as in data (since both R1 and D1 are unique we can here hold also inverse of D1 R1
+R as in reference, D as in data (since both R1 and D1 are unique we can here hold also inverse of D1 R1
 aka atoms of "godelized" or otherwise compressed/encoded unreducible symbols/strings/axioms/axis
 i.e. set of unique references
-i'm not sure if there is any other better way than to simply monotonically number ever new occurence since those refernces need to
-be stable and world of entities is open and completely arbitrary (it may be any "blob" of data, but for IFS sake we keep thinking of "whitespaced" words) perhaps strictness can be lessened and better/smarter/optimer way may be found if occasional full space re-referncing turns out to be cheap.
+i'm not sure if there is any other better way than to simply monotonically number ever new occurrence since those references need to
+be stable and world of entities is open and completely arbitrary (it may be any "blob" of data, but for IFS sake we keep thinking of "white-spaced" words) perhaps strictness can be lessened and better/smarter/optimer way may be found if occasional full space re-referencing turns out to be cheap.
 
 1. table R2 R1 (MR?)
-index of every occurence of a given D(ata) to MR - refernce to meta? event aka event as it is described above.
+index of every occurrence of a given D(ata) to MR - reference to meta? event aka event as it is described above.
 crux of the matter of course is in impossibility of inversion without creation of "buckets" for ever AXIS...
 
 2. table MR R2^N
 i.e. "event"ual vectors of a(tomic)events from 1. table (spaceF)
 
 some "golden"/"bright" thoughts:
-refernce is compression of empty meaning
-occurence of a concept (aka ametaevent) not in the space of the concept BUT in the space of concepts (uhm?)
-=> therefore there exists subspace of concept occurences...
-but of course since 2. table can be thought of as set of vectors on the versors of axis from 0. table (every non-occurence of aevent in a given event is marked with zero). problem of course is in the dimension of space, it's internal mutability of creating new axis with definitial events and exernal mutability of adding new axis.
-not to mention of a problem of holding stability of refernces...
+reference is compression of empty meaning
+occurrence of a concept (aka ametaevent) not in the space of the concept BUT in the space of concepts (uhm?)
+=> therefore there exists subspace of concept occurrences...
+but of course since 2. table can be thought of as set of vectors on the versors of axis from 0. table (every non-occurrence of aevent in a given event is marked with zero). problem of course is in the dimension of space, it's internal mutability of creating new axis with definitional events and external mutability of adding new axis.
+not to mention of a problem of holding stability of references...
 
-inversion of the metaconcept on the axel (0. table) of inversion (it's all basically about changes of bases between different vector spaces... ) leads (must lead) to identity (in order to prevent infinite regress...
+inversion of the meta-concept on the axle (0. table) of inversion (it's all basically about changes of bases between different vector spaces... ) leads (must lead) to identity (in order to prevent infinite regress...
 concepts indexed by their "point" in space
 
 aevents are STOP
@@ -70,5 +70,5 @@ I/O & 3 registers + CTX...
 
 ---
 
-but although going "somewheres" it all sucked becaused it lacked "quickly"-ness mentioned in point f.
+but although going "somewheres" it all sucked because it lacked "quickly"-ness mentioned in point f.
 
