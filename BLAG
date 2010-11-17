@@ -1,5 +1,5 @@
 
-2010 11 13 06 24 42  UTC
+2010 11 13  06 24 42   UTC
 
 The idea of Yiaesh is born in the form of README file. Tossing initial
 prototype of GTD scheme in the form of shell script trying to use tdbtool.
@@ -7,7 +7,7 @@ Spent last two days re-pondering what and how I want to achieve and I think
 I have an initial shape of implementation of the "historical snippets
 database" in my head. Now, C, baby, hawabanga, dude! Segment<carrier> lost.
 
-2010 11 14 07 57 08  UTC
+2010 11 14  07 57 08   UTC
 
 Looks like it's going to take loonger than my meager C skills envisioned it
 to me ;-} Basic init, eventcount, etc is in place and at the point of making
@@ -17,7 +17,30 @@ access, versioning DB and the like. But first there is a need to describe
 what/how/why I want to implement lest it slips my mind and messy paper notes,
 again. As it is, now, main() simply passes everything to say(), so it should
 be easy to insert it into esh at any time, but while it's still not working it
-may as well remain an individial executable and a sort of poligon for further
+may as well remain an individual executable and a sort of poligon for further
 development. Calling it dereferencier (or simply DrFe) in the spirit of GTD and
 "snippets" application.
+
+2010 11 17  02 00 17   UTC
+
+Whee... how time flies... So basically, after going through the "motions" of
+the "vision" for like the fourth or fifth time (not counting all those other,
+previous times I was pondering it, but only recent spiel), conclusion is, as
+usual, anti-climatic, to say the least[tm]. First, the only bright idea is the
+use of doubly-linked list of ALL AEVENTS, but first and a half, the need to
+compress is still mostly foggy, as I realized "today" that on the one hand I
+want to preserve CDATA of AEVENTs only in their initial/root position, but
+on the other hand was storing index uint32_t in its decimal AND string (silly
+moi) representation (rotfl)... second, it really looks like I'll be forced
+to implement some sort of ad hoc garbage collection (collector would sound
+to presumptuous as at the least I'd have to try for some reference counting,
+but I don't think I'm ready to go there yet), or at the least an in memory,
+cache/mediator between inputous user and disk tdb store. For now, when the
+mode of operation is a short-lived process encoding and storing EVENT to disk
+it's not a priority beside my own personal structuring of passing "memory
+responsibility" around the procedures. Third, it's basically nothing more than
+hearkening to the old (and tired, since I realized that all those long past
+attempts ago) idea of W-grammars. I guess since they are Turing complete I'll
+never find their formal name among data structures as they pertain to data
+bases not to algorithms as such. Damn you, Tarring tur-pits!
 
