@@ -12,8 +12,8 @@ typedef unsigned char uchar_t ;
 
 /* a strings? */
 struct blob {
-  uint32_t len ;
   uchar_t *dat ;
+  size_t len ;
 } ;
 
 struct blobs {
@@ -63,4 +63,11 @@ struct db* store_open_fiber(char*, struct blobs) ;
 int store_close_fiber(struct db*) ;
 void store_lsns(struct db*) ;
 struct blob make_blob(char*) ;
+
+int store_extend(struct db*, const char*, struct kons) ;
+int store_exists(struct db*, const char*, struct blob) ;
+int store_inside(struct db*, const char*, struct kons) ;
+int store_remove(struct db*, const char*, struct blob) ;
+
+struct blob store_restore(struct db*, const char*, struct blob) ;
 
