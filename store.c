@@ -7,7 +7,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stddef.h> /* offsetof */
+/* #include <stddef.h> /* offsetof */
 #include <string.h>
 
 #include "store.h"
@@ -79,7 +79,7 @@ void store_lsns(struct db *fiber)
   struct registry *current = fiber->first ;
   printf("# store_lsns: %s\n", path) ;
   while ( current != NULL ) {
-	printf("# store_lsns: %s%s (%s)\n", path, current->name.dat, ((char*)current->store + offsetof(TDB_CONTEXT, name))) ;
+	printf("# store_lsns: %s%s (%s)\n", path, current->name.dat, tdb_name(current->store)) ;
 	current = current->next ;
   }
 }
