@@ -73,6 +73,49 @@ struct db* store_open_fiber(char *dir, struct blobs names)
   return fiber ;
 }
 
+struct registry* free_register(struct registry *reg)
+{
+  struct registry* ret = NULL ;
+  if (reg == NULL)
+	return ret ;
+  ret = reg->next ;
+
+  /* TODO: please be conseqential... */
+  /* free_blob(reg->name) ; */
+  /* can we determine if they are static and can't be deallocated? */
+  if (reg->store != NULL)
+	tdb_close(reg->store) ;
+  /* rack ?!? */
+  free(reg) ;
+
+  return ret ;
+}
+
+int store_close_fiber(struct db* fiber)
+{
+  int ret = -1 ;
+  struct registry *current ;
+
+  if (fiber == NULL)
+	return ret ;
+#ifdef _SDEBUG
+  printf("# store_close_fiber: %s ::", fiber->path.dat) ;
+#endif
+  current = fiber->first ;
+  while ( current != NULL ) {
+#ifdef _SDEBUG
+	printf(" %s", current->name.dat) ;
+#endif
+	current = free_register(current) ;
+  }
+  free_blob(fiber->path) ;
+  free(fiber);
+#ifdef _SDEBUG
+	printf("\n") ;
+#endif
+  return 0 ;
+}
+
 void store_lsns(struct db *fiber)
 {
   uchar_t *path = fiber->path.dat ;
@@ -101,3 +144,9 @@ struct blob make_blob(char *str)
   return test ;
 }
 
+/* a macro?!? */
+void free_blob(struct blob str)
+{
+  if (str.dat != NULL)
+	free(str.dat) ;
+}

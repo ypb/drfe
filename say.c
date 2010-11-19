@@ -94,6 +94,7 @@ int say_init(char *dir)
   /* LOL, shouldn't that be a SEGFAULT? too little stack use? */
   printf("# say_init: db->path.dat=%s db->path.len=%i\n", temp->path.dat, temp->path.len) ;
   store_lsns(temp) ;
+  printf("# say_init: store_close_fiber->%i\n", store_close_fiber(temp)) ;
 
   return say_open_fiber() ;
 }
