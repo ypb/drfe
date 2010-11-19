@@ -24,7 +24,7 @@ struct db* store_open_fiber(char *dir, struct blobs names)
   int n, d = strlen(dir) ;
   int i, j = names.len ;
 
-  if (d > SMALL_BUF - 1)
+  if (d > SMALL_BUF - 2)
 	return NULL ;
   strncpy(buf, dir, d); buf[d] = '/' ; buf[++d] = '\0' ;
 
@@ -42,7 +42,7 @@ struct db* store_open_fiber(char *dir, struct blobs names)
 	printf("# store_open_fiber: opening reg(%i)=%s\n", i, names.dat[i]) ;
 #endif
 	n = strlen(names.dat[i]) ;
-	if (SMALL_BUF < d + n + 3) /* d+(n-1)+4 AS d "includes" \0 */
+	if (SMALL_BUF < d + n + 4) /* d+n+4 AS d "includes" \0 */
 	  return NULL ;
 	strncpy(buf + d, names.dat[i], n) ;
 	strncpy(buf + d + n, ".tdb", 5) ;
@@ -249,11 +249,11 @@ struct blob make_blob(char *str)
 {
   struct blob test ;
   test.len = strlen(str) ;
-  test.dat = (uchar_t*)malloc(test.len) ;
+  test.dat = (uchar_t*)malloc(test.len + 1) ;
   if (test.dat == NULL) {
 	perror("# make_blob: malloc failed") ;
   } else {
-	strncpy(test.dat, str, test.len) ;
+	strncpy(test.dat, str, test.len + 1) ;
 #ifdef _SDEBUG
 	printf("# make_blob: len(%i) str(%s)@(%p) dat(%s)@(%p)\n", test.len, str, str, test.dat, test.dat) ;
 #endif
