@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h> /* offsetof */
 #include <string.h>
 
 #include "store.h"
@@ -15,7 +16,7 @@
 
 struct db* store_open_fiber(char *dir, struct blobs names)
 {
-  struct db fiber ;
+  struct db *fiber ;
   struct registry *temp, *current ;
   TDB_CONTEXT *ctx ;
   char buf[SMALL_BUF] ;
@@ -25,13 +26,16 @@ struct db* store_open_fiber(char *dir, struct blobs names)
   if (d > SMALL_BUF - 1)
 	return NULL ;
   strncpy(buf, dir, d); buf[d] = '/' ; buf[++d] = '\0' ;
-  fiber.path.dat = buf ; fiber.path.len = d ;
+
+  fiber = (struct db*)malloc(sizeof(struct db)) ;
+  if (fiber == NULL)
+	return NULL ;
+  fiber->first = current = temp = NULL ;
+  /* fiber->path.dat = buf ; fiber->path.len = d ; */
+  fiber->path = make_blob(buf) ;
 #ifdef _SDEBUG
   printf("# store_open_fiber: opening %i regs in %s\n", j, buf) ;
 #endif
-
-  fiber.first = current = temp = NULL ;
-
   for (i = 0; i < j; i++) {
 #ifdef _SDEBUG
 	printf("# store_open_fiber: opening reg(%i)=%s\n", i, names.dat[i]) ;
@@ -47,6 +51,7 @@ struct db* store_open_fiber(char *dir, struct blobs names)
 	  perror("# store_open_fiber: failed allocating struct reg") ;
 	  return NULL ; /* or should we already try to clean up here */
 	}
+	/* ?make_blob? tho for now names.dat are static */
 	temp->name.dat = names.dat[i] ; temp->name.len = n ;
 
 	ctx = tdb_open(buf, 0, 0, O_CREAT| O_RDWR, S_IRUSR | S_IWUSR) ;
@@ -56,8 +61,8 @@ struct db* store_open_fiber(char *dir, struct blobs names)
 	}
 	temp->store = ctx ;
 
-	if (fiber.first == NULL) {
-	  fiber.first = temp ;
+	if (fiber->first == NULL) {
+	  fiber->first = temp ;
 	  current = temp ;
 	} else {
 	  current->next = temp ;
@@ -65,7 +70,7 @@ struct db* store_open_fiber(char *dir, struct blobs names)
 	}
   }
 
-  return &fiber ;
+  return fiber ;
 }
 
 void store_lsns(struct db *fiber)
@@ -74,7 +79,25 @@ void store_lsns(struct db *fiber)
   struct registry *current = fiber->first ;
   printf("# store_lsns: %s\n", path) ;
   while ( current != NULL ) {
-	printf("# store_lsns: %s%s\n", path, current->name.dat) ;
+	printf("# store_lsns: %s%s (%s)\n", path, current->name.dat, ((char*)current->store + offsetof(TDB_CONTEXT, name))) ;
 	current = current->next ;
   }
 }
+
+/* just strdup? still need to "destroy_blob" */
+struct blob make_blob(char *str)
+{
+  struct blob test ;
+  test.len = strlen(str) ;
+  test.dat = (uchar_t*)malloc(test.len) ;
+  if (test.dat == NULL) {
+	perror("# make_blob: malloc failed") ;
+  } else {
+	strncpy(test.dat, str, test.len) ;
+#ifdef _SDEBUG
+	printf("# make_blob: len(%i) str(%s)@(%p) dat(%s)@(%p)\n", test.len, str, str, test.dat, test.dat) ;
+#endif
+  }
+  return test ;
+}
+

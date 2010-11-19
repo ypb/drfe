@@ -142,17 +142,22 @@ int say_open_fiber()
 int say_fini()
 {
   int ret = -1 ;
+  struct blob name ;
+  char * cname ;
   TDB_CONTEXT *current ;
   TDB_CONTEXT **piter = &db_tables.event ;
   int i, j = sizeof(struct db_fiber) / sizeof(TDB_CONTEXT*) ;
 
   for (i = 0; i < j; i++) {
-	current = *piter ;
+	current = (TDB_CONTEXT*) *piter ;
 	if (current != NULL) {
+	  cname = tdb_name(current) ;
+	  name = make_blob((char*)current) ;
 #ifdef _SDEBUG
-	  printf("# say_fini: closing (%i) *ctx=%p\n", i, (void*) current) ;
+	  printf("# say_fini: closing (%i) *ctx=%p name=(%p)->%s\n", i, (void*) current, (void*) name.dat, cname) ;
 #endif
 	  ret = tdb_close(current) ;
+	  free(name.dat) ;
 	}
 	piter++;
   }
