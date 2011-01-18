@@ -153,7 +153,7 @@ int say_fini()
 	current = (TDB_CONTEXT*) *piter ;
 	if (current != NULL) {
 	  cname = tdb_name(current) ;
-	  name = make_blob((char*)current) ;
+	  name = make_blob(*(char**)current) ;
 #ifdef _SDEBUG
 	  printf("# say_fini: closing (%i) *ctx=%p name=(%p)->%s\n", i, (void*) current, (void*) name.dat, cname) ;
 #endif

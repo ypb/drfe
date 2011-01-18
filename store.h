@@ -63,6 +63,7 @@ struct db* store_open_fiber(char*, struct blobs) ;
 int store_close_fiber(struct db*) ;
 void store_lsns(struct db*) ;
 struct blob make_blob(char*) ;
+void free_blob(struct blob) ;
 
 int store_extend(struct db*, const char*, struct kons) ;
 int store_exists(struct db*, const char*, struct blob) ;

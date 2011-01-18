@@ -53,7 +53,8 @@ struct db* store_open_fiber(char *dir, struct blobs names)
 	  return NULL ; /* or should we already try to clean up here */
 	}
 	/* ?make_blob? tho for now names.dat are static */
-	temp->name.dat = names.dat[i] ; temp->name.len = n ;
+	/* temp->name.dat = names.dat[i] ; temp->name.len = n ; */
+	temp->name = make_blob(names.dat[i]);
 
 	ctx = tdb_open(buf, 0, 0, O_CREAT| O_RDWR, S_IRUSR | S_IWUSR) ;
 	if (ctx == NULL) {
@@ -61,6 +62,8 @@ struct db* store_open_fiber(char *dir, struct blobs names)
 	  return NULL ;
 	}
 	temp->store = ctx ;
+	/* ja pierdole... */
+	temp->next = NULL ;
 
 	if (fiber->first == NULL) {
 	  fiber->first = temp ;
@@ -82,7 +85,7 @@ struct registry* free_register(struct registry *reg)
   ret = reg->next ;
 
   /* TODO: please be conseqential... */
-  /* free_blob(reg->name) ; */
+  free_blob(reg->name) ;
   /* can we determine if they are static and can't be deallocated? */
   if (reg->store != NULL)
 	tdb_close(reg->store) ;
@@ -122,6 +125,9 @@ TDB_CONTEXT* get_reg(struct db* fiber, const char* name)
   TDB_CONTEXT *ret = NULL ;
   struct registry *current ;
 
+#ifdef _SDEBUG
+  printf("# get_reg: from fiber(%p) name(%s)\n", fiber, name);
+#endif
   if (fiber == NULL)
 	return ret ;
   if (name == NULL)
@@ -152,6 +158,9 @@ int store_operate(struct db* fiber, const char* reg, struct kons data, int opt)
 }
 int store_extend(struct db* fiber, const char* reg, struct kons data)
 {
+#ifdef _SDEBUG
+  printf("# store_extend: k(%s)/v(%s)\n", data.key.dat, data.val.dat);
+#endif
   return store_operate(fiber, reg, data, TDB_INSERT) ;
 }
 int store_exists(struct db* fiber, const char* reg, struct blob key)
@@ -221,7 +230,9 @@ int store_test(struct db *fiber)
 
   printf("# store_test: db->path.dat=%s db->path.len=%i\n", fiber->path.dat, fiber->path.len) ;
   store_lsns(fiber) ;
-  printf("# store_test: store_extend->%i\n", store_extend(fiber, reg, cunt)) ;
+  /* printf("EXTENDING\n"); */
+  stat = store_extend(fiber, reg, cunt);
+  printf("# store_test: store_extend->%i\n", stat) ;
 
   stat = store_extend(fiber, reg, tdat) ;
   /* oh man... like for REALZ
