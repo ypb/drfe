@@ -73,6 +73,7 @@ struct db* store_open_fibers(char *dir, struct blobs names)
 	  current->next = temp ;
 	  current = temp ;
 	}
+	temp = NULL;
   }
 
   return fiber ;
