@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include "store.h"
+/* #include "data.h" */
 
 #define SMALL_BUF 64
 #define DEFAULT_REG "info"
@@ -33,7 +34,7 @@ struct db* store_open_fiber(char *dir, struct blobs names)
 	return NULL ;
   fiber->first = current = temp = NULL ;
   /* fiber->path.dat = buf ; fiber->path.len = d ; */
-  fiber->path = make_blob(buf) ;
+  fiber->path = blob_make(buf) ;
 #ifdef _SDEBUG
   printf("# store_open_fiber: opening %i regs in %s\n", j, buf) ;
 #endif
@@ -54,7 +55,7 @@ struct db* store_open_fiber(char *dir, struct blobs names)
 	}
 	/* ?make_blob? tho for now names.dat are static */
 	/* temp->name.dat = names.dat[i] ; temp->name.len = n ; */
-	temp->name = make_blob(names.dat[i]);
+	temp->name = blob_make(names.dat[i]);
 
 	ctx = tdb_open(buf, 0, 0, O_CREAT| O_RDWR, S_IRUSR | S_IWUSR) ;
 	if (ctx == NULL) {
@@ -85,7 +86,7 @@ struct registry* free_register(struct registry *reg)
   ret = reg->next ;
 
   /* TODO: please be conseqential... */
-  free_blob(reg->name) ;
+  blob_free(reg->name) ;
   /* can we determine if they are static and can't be deallocated? */
   if (reg->store != NULL)
 	tdb_close(reg->store) ;
@@ -112,7 +113,7 @@ int store_close_fiber(struct db* fiber)
 #endif
 	current = free_register(current) ;
   }
-  free_blob(fiber->path) ;
+  blob_free(fiber->path) ;
   free(fiber);
 #ifdef _SDEBUG
 	printf("\n") ;
@@ -152,8 +153,8 @@ int store_operate(struct db* fiber, const char* reg, struct kons data, int opt)
   if (ctx == NULL)
 	return ret ;
 
-  key.dptr = data.key.dat ; key.dsize = data.key.len ;
-  val.dptr = data.val.dat ; val.dsize = data.val.len ;
+  key.dptr = (unsigned char*)data.key.dat ; key.dsize = data.key.len ;
+  val.dptr = (unsigned char*)data.val.dat ; val.dsize = data.val.len ;
 #ifdef _SDEBUG
   printf("# store_opt(%s): %s%s with k(%s)v(%s)\n", opt == TDB_MODIFY ? "inside" : "extend", fiber->path.dat, reg, data.key.dat, data.val.dat) ;
 #endif
@@ -177,7 +178,7 @@ int store_exists(struct db* fiber, const char* reg, struct blob key)
 	return ret ;
 
   /* data = key ; /* error: conversion to non-scalar type requested */
-  data.dptr = key.dat ; data.dsize = key.len ;
+  data.dptr = (unsigned char*)key.dat ; data.dsize = key.len ;
   return tdb_exists(ctx, data) ;
 }
 
@@ -194,7 +195,7 @@ int store_remove(struct db* fiber, const char* reg, struct blob key)
   if (ctx == NULL)
 	return ret ;
 
-  data.dptr = key.dat ; data.dsize = key.len ;
+  data.dptr = (unsigned char*)key.dat ; data.dsize = key.len ;
 #ifdef _SDEBUG
   printf("# store_remove: key=(%s) from %s%s\n", key.dat, fiber->path.dat, reg) ;
 #endif
@@ -209,15 +210,15 @@ struct blob store_restore(struct db* fiber, const char* reg, struct blob key)
   if (ctx == NULL)
 	return ret ;
 
-  data.dptr = key.dat ; data.dsize = key.len ;
+  data.dptr = (unsigned char*)key.dat ; data.dsize = key.len ;
   data = tdb_fetch(ctx, data) ;
-  ret.dat = data.dptr ; ret.len = data.dsize ;
+  ret.dat = (char*)data.dptr ; ret.len = data.dsize ;
   return ret ;
 }
 
 void store_lsns(struct db *fiber)
 {
-  uchar_t *path = fiber->path.dat ;
+  char *path = fiber->path.dat ;
   struct registry *current = fiber->first ;
   printf("# store_lsns: %s\n", path) ;
   while ( current != NULL ) {
@@ -263,26 +264,3 @@ int store_test(struct db *fiber)
   return ret ;
 }
 
-/* just strdup? still need to "destroy_blob" */
-struct blob make_blob(char *str)
-{
-  struct blob test ;
-  test.len = strlen(str) ;
-  test.dat = (uchar_t*)malloc(test.len + 1) ;
-  if (test.dat == NULL) {
-	perror("# make_blob: malloc failed") ;
-  } else {
-	strncpy(test.dat, str, test.len + 1) ;
-#ifdef _SDEBUG
-	printf("# make_blob: len(%i) str(%s)@(%p) dat(%s)@(%p)\n", test.len, str, str, test.dat, test.dat) ;
-#endif
-  }
-  return test ;
-}
-
-/* a macro?!? */
-void free_blob(struct blob str)
-{
-  if (str.dat != NULL)
-	free(str.dat) ;
-}

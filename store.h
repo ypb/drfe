@@ -5,21 +5,7 @@
 #include <sys/types.h>
 #include <tdb.h>
 
-/* to typedef the rest or not to typedef */
-typedef unsigned char uchar_t ;
-
-/* SHRUG */
-
-/* a strings? */
-struct blob {
-  uchar_t *dat ;
-  size_t len ;
-} ;
-
-struct blobs {
-  uint32_t len ;
-  uchar_t **dat ;
-} ;
+#include "data.h"
 
 /* a key/value record */
 struct kons {
@@ -60,9 +46,6 @@ struct db {
 struct db* store_open_fiber(char*, struct blobs) ;
 int store_close_fiber(struct db*) ;
 void store_lsns(struct db*) ;
-
-struct blob make_blob(char*) ;
-void free_blob(struct blob) ;
 
 /* (const char*) is internal key/val substorage's tag*/
 /* insert key/val if new i.e. don't overwrite */

@@ -158,7 +158,7 @@ int say_fini()
 	current = (TDB_CONTEXT*) *piter ;
 	if (current != NULL) {
 	  cname = tdb_name(current) ;
-	  name = make_blob(*(char**)current) ;
+	  name = blob_make(*(char**)current) ;
 #ifdef _SDEBUG
 	  printf("# say_fini: closing (%i) *ctx=%p name=(%p)->%s\n", i, (void*) current, (void*) name.dat, cname) ;
 #endif
@@ -212,7 +212,7 @@ int say_sync_eventcount(char opt, uint32_t *count)
 	  return ret ;
 	}
 	snprintf(buf, 24, "%i", *count) ;
-	val.dptr = buf ;
+	val.dptr = (unsigned char*)buf ;
 	val.dsize = strlen(buf) ;
 	status = tdb_store(ctx, key, val, 0) ;
 	if (status == -1) {

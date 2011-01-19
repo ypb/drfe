@@ -9,8 +9,8 @@ CPPFLAGS=
 LDFLAGS=-ltdb
 
 BIN=drfe
-INCS=say.h store.h
-SRCS=main.c say.c store.c
+INCS=say.h store.h data.h
+SRCS=main.c say.c store.c data.c
 OBJS=$(SRCS:%.c=%.o)
 
 #all: depend drfe
@@ -21,6 +21,8 @@ $(BIN): $(OBJS)
 main.o: main.c say.h
 
 say.o: say.c store.h
+
+data.o: data.c data.h
 
 clean:
 		rm -f *~ $(OBJS) $(BIN)
