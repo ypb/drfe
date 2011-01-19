@@ -156,6 +156,7 @@ int store_operate(struct db* fiber, const char* reg, struct kons data, int opt)
 #endif
   return tdb_store(ctx, key, val, opt) ;
 }
+
 int store_extend(struct db* fiber, const char* reg, struct kons data)
 {
 #ifdef _SDEBUG
@@ -163,6 +164,7 @@ int store_extend(struct db* fiber, const char* reg, struct kons data)
 #endif
   return store_operate(fiber, reg, data, TDB_INSERT) ;
 }
+
 int store_exists(struct db* fiber, const char* reg, struct blob key)
 {
   int ret = -1 ;
@@ -175,10 +177,12 @@ int store_exists(struct db* fiber, const char* reg, struct blob key)
   data.dptr = key.dat ; data.dsize = key.len ;
   return tdb_exists(ctx, data) ;
 }
+
 int store_inside(struct db* fiber, const char* reg, struct kons data)
 {
   return store_operate(fiber, reg, data, TDB_MODIFY) ;
 }
+
 int store_remove(struct db* fiber, const char* reg, struct blob key)
 {
   int ret = -1 ;
@@ -193,6 +197,7 @@ int store_remove(struct db* fiber, const char* reg, struct blob key)
 #endif
   return tdb_delete(ctx, data) ;
 }
+
 struct blob store_restore(struct db* fiber, const char* reg, struct blob key)
 {
   struct blob ret = { NULL, 0 } ;
