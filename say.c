@@ -12,7 +12,8 @@
 
 #include "store.h"
 
-#define ROOTPATH "store"
+/* for now it's a sub-directory... relative to cwd of the exec()utor */
+#define ROOTPATH ".say_store"
 #define DATABASE "events.tdb"
 
 #define init_td_data(x) { (unsigned char*)x, sizeof(x) }
@@ -20,12 +21,12 @@
 /* BAAAD GLOBALs */
 
 char *db_names[] = {
-  "event.tdb",
-  "head.tdb",
-  "atomic.tdb",
-  "tail.tdb",
-  "meta.tdb",
-  "info.tdb"
+  "event",
+  "head",
+  "atomic",
+  "tail",
+  "meta",
+  "info"
 } ;
 
 struct blobs reg_names = { 6, db_names } ;
@@ -47,11 +48,11 @@ struct db_fiber {
 int say_open_fiber() ;
 int say_test(int) ;
 
-int say_init(char *dir)
+struct db* say_init(char *dir)
 {
   struct stat buffer ;
   int status, err ;
-  int ret = -1 ;
+  struct db* ret = NULL;
 
   if (dir == NULL) {
 	dir = ROOTPATH ;
@@ -90,13 +91,17 @@ int say_init(char *dir)
 	return ret ;
   }
 
-  struct db *temp = store_open_fiber(dir, reg_names) ;
-  /* LOL, shouldn't that be a SEGFAULT? too little stack use? */
-  printf("# say_init: db->path.dat=%s db->path.len=%i\n", temp->path.dat, temp->path.len) ;
-  store_test(temp) ;
-  printf("# say_init: store_close_fiber->%i\n", store_close_fiber(temp)) ;
+  ret = store_open_fiber(dir, reg_names);
+  if (ret == NULL) {
+	perror("# say_init: failed to open database");
+	return ret;
+  }
+  /* LOL, shouldn't that be a SEGFAULT? too little stack use? HMMMMM....?*/
+#ifdef _SDEBUG 
+  printf("# say_init: db->path.dat=%s db->path.len=%i\n", ret->path.dat, ret->path.len);
+#endif
 
-  return say_open_fiber() ;
+  return ret;
 }
 
 int say_open_fiber()
@@ -267,6 +272,7 @@ int say(int argc, char *argv[])
 {
   int status ;
   TDB_CONTEXT *ctx ;
+  struct db* snipper;
 
 #ifdef _SDEBUG
   int i ;
@@ -275,9 +281,18 @@ int say(int argc, char *argv[])
   }
 #endif
 
-  status = say_init(NULL) ;
-  if (status == -1)
+  snipper = say_init(NULL) ;
+  if (snipper == NULL)
 	return 128 ;
+#ifdef _SDEBUG
+  store_test(snipper);
+#endif
+  status = store_close_fiber(snipper);
+  printf("# say: store_close_fiber->%i\n", status);
+
+  status = say_open_fiber();
+  if (status == -1)
+	return 128;
 #ifdef _SDEBUG
   say_test(status) ;
 #endif

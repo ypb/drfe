@@ -1,3 +1,4 @@
 *.o
 /store/
+/.say_store/
 /drfe

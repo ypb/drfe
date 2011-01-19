@@ -2,9 +2,9 @@
 
 CC=gcc
 
-CFLAGS=-Wall -pedantic -ansi -g
+CFLAGS=-Wall -pedantic -ansi
 #CFLAGS=-Wall -pedantic -std=c99
-CFLAGS+=-D_SDEBUG
+CFLAGS+=-D_SDEBUG -g
 CPPFLAGS=
 LDFLAGS=-ltdb
 

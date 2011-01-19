@@ -125,19 +125,22 @@ TDB_CONTEXT* get_reg(struct db* fiber, const char* name)
   TDB_CONTEXT *ret = NULL ;
   struct registry *current ;
 
+  if (name == NULL)
+	name = DEFAULT_REG;
 #ifdef _SDEBUG
-  printf("# get_reg: from fiber(%p) name(%s)\n", fiber, name);
+  printf("# get_reg: named(%s) from db@(%p)\n", name, (void*)fiber);
 #endif
   if (fiber == NULL)
 	return ret ;
-  if (name == NULL)
-	name = DEFAULT_REG ;
   current = fiber->first ;
   while ( current != NULL ) {
 	if (current->name.dat && (strcmp(current->name.dat, name) == 0))
 	  return current->store ;
 	current = current->next ;
   }
+#ifdef _SDEBUG
+  printf("# get_reg: not found...\n");
+#endif
   return ret ;
 }
 
@@ -226,7 +229,7 @@ void store_lsns(struct db *fiber)
 int store_test(struct db *fiber)
 {
   int stat, ret = -1 ;
-  char *reg = "info.tdb" ;
+  char *reg = DEFAULT_REG;
   struct kons tdat = { {"0", 2}, {"ala ma kota", 12} } ;
   struct blob tres = {NULL, 0} ;
   struct kons cunt = { {"eventcount", 11}, {"0", 2}} ;
