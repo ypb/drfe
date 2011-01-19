@@ -16,7 +16,7 @@
 #define SMALL_BUF 64
 #define DEFAULT_REG "info"
 
-struct db* store_open_fiber(char *dir, struct blobs names)
+struct db* store_open_fibers(char *dir, struct blobs names)
 {
   struct db *fiber ;
   struct registry *temp, *current ;
@@ -36,11 +36,11 @@ struct db* store_open_fiber(char *dir, struct blobs names)
   /* fiber->path.dat = buf ; fiber->path.len = d ; */
   fiber->path = blob_make(buf) ;
 #ifdef _SDEBUG
-  printf("# store_open_fiber: opening %i regs in %s\n", j, buf) ;
+  printf("# store_open_fibers: opening %i regs in %s\n", j, buf) ;
 #endif
   for (i = 0; i < j; i++) {
 #ifdef _SDEBUG
-	printf("# store_open_fiber: opening reg(%i)=%s\n", i, names.dat[i]) ;
+	printf("# store_open_fibers: opening reg(%i)=%s\n", i, names.dat[i]) ;
 #endif
 	n = strlen(names.dat[i]) ;
 	if (SMALL_BUF < d + n + 4) /* d+n+4 AS d "includes" \0 */
@@ -50,7 +50,7 @@ struct db* store_open_fiber(char *dir, struct blobs names)
 
 	temp = (struct registry*)malloc(sizeof(struct registry)) ;
 	if (temp == NULL) {
-	  perror("# store_open_fiber: failed allocating struct reg") ;
+	  perror("# store_open_fibers: failed allocating struct reg") ;
 	  return NULL ; /* or should we already try to clean up here */
 	}
 	/* ?make_blob? tho for now names.dat are static */
@@ -59,7 +59,7 @@ struct db* store_open_fiber(char *dir, struct blobs names)
 
 	ctx = tdb_open(buf, 0, 0, O_CREAT| O_RDWR, S_IRUSR | S_IWUSR) ;
 	if (ctx == NULL) {
-	  perror("# say_open_fiber: failed to open TDB") ;
+	  perror("# store_open_fibers: failed to open TDB") ;
 	  return NULL ;
 	}
 	temp->store = ctx ;
@@ -96,7 +96,7 @@ struct registry* free_register(struct registry *reg)
   return ret ;
 }
 
-int store_close_fiber(struct db* fiber)
+int store_close(struct db* fiber)
 {
   int ret = -1 ;
   struct registry *current ;
@@ -104,7 +104,7 @@ int store_close_fiber(struct db* fiber)
   if (fiber == NULL)
 	return ret ;
 #ifdef _SDEBUG
-  printf("# store_close_fiber: %s ::", fiber->path.dat) ;
+  printf("# store_close: %s ::", fiber->path.dat) ;
 #endif
   current = fiber->first ;
   while ( current != NULL ) {

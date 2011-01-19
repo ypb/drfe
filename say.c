@@ -91,7 +91,7 @@ struct db* say_init(char *dir)
 	return ret ;
   }
 
-  ret = store_open_fiber(dir, reg_names);
+  ret = store_open_fibers(dir, reg_names);
   if (ret == NULL) {
 	perror("# say_init: failed to open database");
 	return ret;
@@ -287,8 +287,8 @@ int say(int argc, char *argv[])
 #ifdef _SDEBUG
   store_test(snipper);
 #endif
-  status = store_close_fiber(snipper);
-  printf("# say: store_close_fiber->%i\n", status);
+  status = store_close(snipper);
+  printf("# say: store_close->%i\n", status);
 
   status = say_open_fiber();
   if (status == -1)

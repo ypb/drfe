@@ -43,9 +43,11 @@ struct db {
   struct registry *first ;
 } ;
 
-struct db* store_open_fiber(char*, struct blobs) ;
-int store_close_fiber(struct db*) ;
-void store_lsns(struct db*) ;
+struct db* store_open_fibers(char*, struct blobs) ;
+int store_close(struct db*) ;
+#ifdef _SDEBUG
+int store_test(struct db*);
+#endif
 
 /* (const char*) is internal key/val substorage's tag*/
 /* insert key/val if new i.e. don't overwrite */
