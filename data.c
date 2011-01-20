@@ -41,3 +41,45 @@ struct blob blob_static(char* data) {
   return temp;
 }
 
+/* "UNIVERSAL" KEY */
+
+struct ukey ukey_make() {
+  /* "non-null" init */
+  struct ukey temp = { 0, 0, 0 };
+  time(&temp.seconds);
+  return temp;
+}
+
+int ukey_null(struct ukey check) {
+  return (check.seconds == ((time_t) -1));
+}
+
+struct ukey ukey_uniq(struct ukey last) {
+  struct ukey new;
+  new = ukey_make();
+  /* start pessimistic */
+  if (ukey_null(last)) {
+	printf("%% ukey_uniq: last ukey encountered null\n");
+	return new;
+  }
+  /* caller should check if new is null...
+	 nevertheless continue with optimism */
+  if (new.seconds > last.seconds) {
+	return new;
+  } else if (new.seconds == last.seconds) {
+	last.count++;
+	return last;
+  } else {
+	/* this could be covered by second arm,
+	   but it's a serious error requiring a HOLLER */
+	printf("%% ukey_uniq: clock skew of (%d) seconds\n", \
+		   (int)(last.seconds - new.seconds));
+	last.count++;
+	return last;
+  }
+}
+
+void ukey_print(struct ukey out) {
+  printf("ukey(%i.%i.%i)", (int)out.epoch, (int)out.seconds, out.count);
+}
+

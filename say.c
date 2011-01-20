@@ -116,6 +116,7 @@ int say(int argc, char *argv[])
 {
   int i, status;
   struct db* snipper;
+  struct ukey dakey = { -1,0,0 };
 
 #ifdef _SDEBUG
   for (i = 0; i < argc; i++) {
@@ -130,6 +131,10 @@ int say(int argc, char *argv[])
   store_test(snipper);
 #endif
 
+  dakey = ukey_uniq(dakey);
+  printf("%% say: dakey = "); ukey_print(dakey);
+  printf(" sizeof is %i+%i+%i=%i\n", sizeof(dakey.seconds),
+		 sizeof(dakey.count), sizeof(dakey.epoch), sizeof(dakey));
   for (i = 0; i < argc; i++) {
 	status = say_add_atomic(snipper, argv[i]);
 	printf("# say: say_add_atomic(%s) status(%d)\n", argv[i], status);
