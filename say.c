@@ -112,13 +112,32 @@ int say_add_atomic(struct db* fiber, char* cdata)
   return ret;
 }
 
+struct ukey say_add_event(struct db* fiber, struct blobs elems, struct ukey mark) {
+  int i, status;
+  struct ukey dakey;
+
+  dakey = mark;
+
+  printf("%% event: "); ukey_print(mark); printf("\n");
+  for (i = 0; i < elems.len; i++) {
+	dakey = ukey_uniq(dakey);
+	printf("%% aevent: "); ukey_print(dakey); printf("\n");
+	status = say_add_atomic(fiber, elems.dat[i]);
+	printf("# say_add_event: say_add_atomic(%s) status(%d)\n", elems.dat[i], status);
+  }
+  return dakey;
+}
+
 int say(int argc, char *argv[])
 {
-  int i, status;
+  int status;
   struct db* snipper;
-  struct ukey dakey = { -1,0,0 };
+  struct ukey event = { -1,0,0 };
+  /* it works but gcc warns: initializer element is not computable at load time */
+  struct blobs atoms = { argc, argv };
 
 #ifdef _SDEBUG
+  int i;
   for (i = 0; i < argc; i++) {
 	printf("# say: argv[%i]=%s\n", i, argv[i]);
   }
@@ -131,14 +150,15 @@ int say(int argc, char *argv[])
   store_test(snipper);
 #endif
 
-  dakey = ukey_uniq(dakey);
-  printf("%% say: dakey = "); ukey_print(dakey);
-  printf(" sizeof is %i+%i+%i=%i\n", sizeof(dakey.seconds),
-		 sizeof(dakey.count), sizeof(dakey.epoch), sizeof(dakey));
-  for (i = 0; i < argc; i++) {
-	status = say_add_atomic(snipper, argv[i]);
-	printf("# say: say_add_atomic(%s) status(%d)\n", argv[i], status);
-  }
+  /* starting off the null end ... recycle gdg? hmmm...*/
+  event = ukey_uniq(event);
+  printf("%% say: dakey = "); ukey_print(event);
+  printf(" sizeof is %i+%i+%i=%i\n", sizeof(event.seconds),
+		 sizeof(event.count), sizeof(event.epoch), sizeof(event));
+
+  event = say_add_event(snipper, atoms, event);
+  printf("%% say: say_add_event status(%s)\n", ukey_null(event) == 0 ? "!null" : "null");
+
 
   status = store_close(snipper);
 #ifdef _SDEBUG
