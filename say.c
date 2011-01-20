@@ -81,17 +81,40 @@ struct db* say_init(char *dir)
   return ret;
 }
 
-char* say_add_atomic(char* cdata)
+int say_add_atomic(struct db* fiber, char* cdata)
 {
-  char *ret = NULL ;
+  /* here key is textual cdata we are storing */
+  struct kons input_AEID;
+  /* and here value is that cdata if it's already present with an above AEID */
+  struct kons AEID_input;
+  /* it's not only slightly confusing me alone ;*/
+  char *reg = db_names[2]; /* "atomic" */
+  int ret = -1;
 
-  return ret ;
+  /* doing the input_AEID direction */
+  struct blob input = blob_static(cdata);
+  struct blob AEID = store_restore(fiber, reg, input);
+
+  /* TODO: encapsulate in a fun? like blob_null or smth? */
+  if (AEID.dat == NULL) {
+	/* for now val = key... i.e. cdata */
+	input_AEID.key = input;
+	/* but will need to generate "timed" key here as input's value */
+	input_AEID.val = input;
+	ret = store_extend(fiber, reg, input_AEID);
+  } else {
+	/* here we should anally make sure AEID_input direction ends up in
+	   input_AEID.key == AEID_input.val being the same string */
+	blob_free(AEID);
+	ret = 0;
+  }
+
+  return ret;
 }
 
 int say(int argc, char *argv[])
 {
   int i, status;
-  char* atomnum;
   struct db* snipper;
 
 #ifdef _SDEBUG
@@ -108,10 +131,8 @@ int say(int argc, char *argv[])
 #endif
 
   for (i = 0; i < argc; i++) {
-	atomnum = say_add_atomic(argv[i]);
-	if (atomnum == NULL) {
-	  printf("# say: say_add_atomic(%s) failure\n", argv[i]);
-	}
+	status = say_add_atomic(snipper, argv[i]);
+	printf("# say: say_add_atomic(%s) status(%d)\n", argv[i], status);
   }
 
   status = store_close(snipper);

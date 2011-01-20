@@ -5,6 +5,8 @@
 
 #include "data.h"
 
+/* TODO: add NULL checks on arguments!?!? for realz! */
+
 /* just strdup? still need to "destroy_blob" see free_blob_ */
 struct blob blob_make(char *str)
 {
@@ -35,7 +37,7 @@ void blob_free(struct blob str)
 struct blob blob_static(char* data) {
   struct blob temp;
   temp.dat = data;
-  temp.len = sizeof(data);
+  temp.len = strlen(data) + 1;
   return temp;
 }
 
