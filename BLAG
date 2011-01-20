@@ -44,3 +44,42 @@ attempts ago) idea of W-grammars. I guess since they are Turing complete I'll
 never find their formal name among data structures as they pertain to data
 bases not to algorithms as such. Damn you, Tarring tur-pits!
 
+2011 01 19  20 32 11   UTC
+
+Long time, no bla... But we are back with at least two important null-pointer
+erm, ekhm, kabloom fixes; final clean up of the old prototypy code and ready
+to concentrate on the clue of the matter. It's time to stop dicking around
+and play with it as if from the point of view of GTD-like app user...
+therefore the first most trivial functionality would be a sort of echo
+chamber where anything 'drfe say'ed would get "atomized" and stored, but
+empty 'say' would report back recent sayings. So the first order of business
+would be to, as the last blah (a blag entry) hinted, decide on "sane" keys
+schemata: some intricate Huffman/hamming coding of ever increasing space of
+atomic entities would probably be the most saving per our requirements but
+since the first, next thing we'd like to record in an app like this is time
+of the events it seems only natural to use this as the keys' encoding.
+Let's say a constant-sized seven byte... ow, what the hell, then it could as
+well be eight bytes for the sake of silly alignment... let's say it'll be
+variable length of no less than six bytes and "optimistically" nine (but
+with an option to extend more in unusual cases): nine because "external"
+representation would need to start with non-utf8 magic byte to distinguish
+it from other "string blobs" (for the purpose of using them together in
+single key/val "table" in a sort of immediate inverted index... and it would
+also distinguish them outside of database), though internally magic byte
+could be dropped. Then it could be followed by four bytes of the "normal"
+Unix time-stamp and additional set of no less than one variable bytes.
+Not sure how practical it is to go into bit twiddling but the thought is
+strictly unimaginative of first bit set in a byte signaling "read more"
+and their contents being split between "epoch" and "event in a second"
+counts with the first taking up progressively more and more bits starting
+with one marking the closest one around 2036... so, this way, the first
+four "free" bytes could accommodate: four wasted "read more" bits, ten
+epoch bits (1+2+3+4) for about 82k years (lol) and about 2000 events per
+second in "only" two variable bytes... three would give a 10^-4 second
+"resolution".
+Is that too much bit-twiddlerly?!? I guess so...
+I suppose no less funny will be trying to actually implement the IDEA's
+vision of double-linking them atomic events throughout line oriented
+events in order to fulfill the next requirement of acting as a variable
+termed history like interface to the daily grindagunk...
+
