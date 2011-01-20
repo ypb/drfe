@@ -10,8 +10,8 @@
 /* #include <stddef.h> /* offsetof */
 #include <string.h>
 
+#include "data.h"
 #include "store.h"
-/* #include "data.h" */
 
 #define SMALL_BUF 64
 #define DEFAULT_REG "info"

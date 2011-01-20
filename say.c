@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <errno.h>
 
+#include "data.h"
 #include "store.h"
 
 /* for now it's a sub-directory... relative to cwd of the exec()utor */

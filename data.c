@@ -31,3 +31,11 @@ void blob_free(struct blob str)
 	free(str.dat);
 }
 
+/* pointeless passing around */
+struct blob blob_static(char* data) {
+  struct blob temp;
+  temp.dat = data;
+  temp.len = sizeof(data);
+  return temp;
+}
+

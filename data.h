@@ -21,3 +21,6 @@ struct blobs {
 struct blob blob_make(char*);
 void blob_free(struct blob);
 
+/* this could probably be just a macro see init_td_data in say.c */
+struct blob blob_static(char*);
+

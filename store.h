@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <tdb.h>
 
-#include "data.h"
+/* #include "data.h" */
 
 /* a key/value record */
 struct kons {
