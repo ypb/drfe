@@ -7,7 +7,8 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-/* #include <stddef.h> /* offsetof */
+/* offsetof */
+/* #include <stddef.h> */
 #include <string.h>
 
 #include "data.h"
@@ -178,7 +179,7 @@ int store_exists(struct db* fiber, const char* reg, struct blob key)
   if (ctx == NULL)
 	return ret ;
 
-  /* data = key ; /* error: conversion to non-scalar type requested */
+  /* data = key ; *//* error: conversion to non-scalar type requested */
   data.dptr = (unsigned char*)key.dat ; data.dsize = key.len ;
   return tdb_exists(ctx, data) ;
 }

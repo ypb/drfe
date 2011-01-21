@@ -33,7 +33,7 @@ want to preserve CDATA of AEVENTs only in their initial/root position, but
 on the other hand was storing index uint32_t in its decimal AND string (silly
 moi) representation (rotfl)... second, it really looks like I'll be forced
 to implement some sort of ad hoc garbage collection (collector would sound
-to presumptuous as at the least I'd have to try for some reference counting,
+too presumptuous as at the least I'd have to try for some reference counting,
 but I don't think I'm ready to go there yet), or at the least an in memory,
 cache/mediator between inputous user and disk tdb store. For now, when the
 mode of operation is a short-lived process encoding and storing EVENT to disk
