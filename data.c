@@ -33,6 +33,10 @@ void blob_free(struct blob str)
 	free(str.dat);
 }
 
+int blob_null(struct blob str) {
+  return (str.dat == NULL);
+}
+
 /* pointeless passing around */
 struct blob blob_static(char* data) {
   struct blob temp;
@@ -48,7 +52,7 @@ void blob_rprint(struct blob bob) {
 	printf(" 0x%2.2x", (unsigned char)bob.dat[i]);
   }
   if (j > 0) {
-	printf(" )");
+	printf(" ) length=%i", bob.len);
   } else {
 	printf(")");
   }
@@ -96,6 +100,20 @@ void ukey_print(struct ukey out) {
   printf("ukey(%i.%i(0x%x).%i)", (int)out.epoch,
 		 (int)out.seconds, (unsigned int)out.seconds,
 		 out.count);
+  /* hmmm... how do you do to once upon it do... TOFIX */
+#ifdef _SDEBUG
+  printf(" sizeof{%i+%i+%i=%i}", sizeof(out.seconds),
+		 sizeof(out.count), sizeof(out.epoch), sizeof(out));
+#endif
+}
+
+void ukey_hprint(struct ukey out) {
+  char stime[64];
+  struct tm* time;
+
+  time = gmtime(&out.seconds);
+  strftime(stime, 64, "%Y%m%d %H%M%S  %Z", time);
+  printf("%s", stime);
 }
 
 /* for now, this is all not so bravely bit twiddly ;-o */

@@ -116,11 +116,11 @@ struct ukey say_add_event(struct db* fiber, struct blobs elems, struct ukey mark
   int i, status;
   struct ukey dakey;
 
-  dakey = mark;
+  mark = ukey_uniq(mark);
 
   printf("%% event: "); ukey_print(mark); printf("\n");
   for (i = 0; i < elems.len; i++) {
-	dakey = ukey_uniq(dakey);
+	dakey = ukey_uniq(mark);
 	printf("%% aevent: "); ukey_print(dakey); printf("\n");
 	status = say_add_atomic(fiber, elems.dat[i]);
 	printf("# say_add_event: say_add_atomic(%s) status(%d)\n", elems.dat[i], status);
@@ -128,11 +128,35 @@ struct ukey say_add_event(struct db* fiber, struct blobs elems, struct ukey mark
   return dakey;
 }
 
+struct ukey say_events_continue(struct db* fiber) {
+  int status;
+  struct kons tot;
+  char *key = "tip_of_time";
+  char *info = db_names[5]; /* "info" register */
+  struct ukey ret = { -1, 0, 0 };
+
+  tot.key = blob_static(key);
+  tot.val = store_restore(fiber, info, tot.key);
+
+  if (blob_null(tot.val)) {
+	ret = ukey_uniq(ret);
+	tot.val = ukey2blob(ret);
+	status = store_extend(fiber, info, tot);
+	/* TOFIX */
+  } else {
+	ret = blob2ukey(tot.val);
+  }
+  blob_free(tot.val);
+
+  return ret;
+}
+
 int say(int argc, char *argv[])
 {
   int status;
   struct db* snipper;
-  struct ukey event = { -1,0,0 };
+  struct ukey tot; /* tip of tehvents */
+  struct ukey now = { -1,0,0 };
   /* it works but gcc warns: initializer element is not computable at load time */
   struct blobs atoms = { argc, argv };
   struct blob test_bkey;
@@ -152,23 +176,24 @@ int say(int argc, char *argv[])
   store_test(snipper);
 #endif
 
+  tot = say_events_continue(snipper);
+  printf("; tot: "); ukey_hprint(tot); putchar('\n');
   /* starting off the null end ... recycle gdg? hmmm...*/
-  event = ukey_uniq(event);
-  printf("%% say: dakey = "); ukey_print(event);
-  printf(" sizeof is %i+%i+%i=%i\n", sizeof(event.seconds),
-		 sizeof(event.count), sizeof(event.epoch), sizeof(event));
+  now = ukey_uniq(now);
+  printf("; now: "); ukey_hprint(now); putchar('\n');
 
   /* testing */
-  test_bkey = ukey2blob(event);
-  printf("%% say: dakey = "); blob_rprint(test_bkey);
-  printf(" length is %i\n", test_bkey.len);
+  printf("# say: ukey_vs_blob test start\n");
+  printf("%% say: now = "); ukey_print(now); putchar('\n');
+  test_bkey = ukey2blob(now);
+  printf("%% say: now = "); blob_rprint(test_bkey); putchar('\n');
   test_ukey = blob2ukey(test_bkey);
-  printf("%% say: dakey = "); ukey_print(test_ukey);
-  printf(" deblobeefied\n");
+  printf("%% say: now = "); ukey_print(test_ukey); putchar('\n');
   blob_free(test_bkey);
+  printf("# say: ukey_vs_blob end\n");
 
-  event = say_add_event(snipper, atoms, event);
-  printf("%% say: say_add_event status(%s)\n", ukey_null(event) == 0 ? "!null" : "null");
+  tot = say_add_event(snipper, atoms, tot);
+  printf("%% say: say_add_event status(%s)\n", ukey_null(tot) == 0 ? "!null" : "null");
 
 
   status = store_close(snipper);

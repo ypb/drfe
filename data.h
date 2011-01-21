@@ -27,6 +27,8 @@ void blob_free(struct blob);
 /* this could probably be just a macro see init_td_data in say.c */
 struct blob blob_static(char*);
 
+int blob_null(struct blob);
+
 void blob_rprint(struct blob);
 
 /* "UNIVERSAL" KEY */
@@ -58,4 +60,4 @@ struct ukey blob2ukey(struct blob);
 
 int ukey_null(struct ukey);
 void ukey_print(struct ukey);
-
+void ukey_hprint(struct ukey);
