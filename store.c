@@ -165,9 +165,9 @@ int store_operate(struct db* fiber, const char* reg, struct kons data, int opt)
 
 int store_extend(struct db* fiber, const char* reg, struct kons data)
 {
-#ifdef _SDEBUG
-  printf("# store_extend: k(%s)/v(%s)\n", data.key.dat, data.val.dat);
-#endif
+/* #ifdef _SDEBUG */
+/*   printf("# store_extend: k(%s)/v(%s)\n", data.key.dat, data.val.dat); */
+/* #endif */
   return store_operate(fiber, reg, data, TDB_INSERT) ;
 }
 

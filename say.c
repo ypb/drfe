@@ -81,49 +81,74 @@ struct db* say_init(char *dir)
   return ret;
 }
 
-int say_add_atomic(struct db* fiber, char* cdata)
+struct blob say_add_atomic(struct db* fiber, char* cdata, struct ukey mark)
 {
+  int status;
   /* here key is textual cdata we are storing */
   struct kons input_AEID;
   /* and here value is that cdata if it's already present with an above AEID */
   struct kons AEID_input;
   /* it's not only slightly confusing me alone ;*/
-  char *reg = db_names[2]; /* "atomic" */
-  int ret = -1;
+  /* dregs */
+  char *head = db_names[1];
+  char *atomic = db_names[2]; /* "atomic" */
+  char *tail = db_names[3];
+  struct blob temp;
+  struct blob ret = { NULL, 0};
 
   /* doing the input_AEID direction */
   struct blob input = blob_static(cdata);
-  struct blob AEID = store_restore(fiber, reg, input);
+  struct blob AEID = store_restore(fiber, head, input);
 
+  printf("%% aevent: cdata{%s}\n", cdata);
   /* TODO: encapsulate in a fun? like blob_null or smth? */
-  if (AEID.dat == NULL) {
+  if (blob_null(AEID)) {
 	/* for now val = key... i.e. cdata */
 	input_AEID.key = input;
 	/* but will need to generate "timed" key here as input's value */
-	input_AEID.val = input;
-	ret = store_extend(fiber, reg, input_AEID);
+	/* mark = ukey_uniq(mark); */
+	temp = ukey2blob(mark);
+	input_AEID.val = temp;
+	status = store_extend(fiber, head, input_AEID);
+	if (status == -1) {
+	  blob_free(temp);
+	} else {
+	  AEID_input.key = temp;
+	  AEID_input.val = input;
+	  status = store_extend(fiber, head, AEID_input);
+	  /* TOFIX: this shouldn't fail... */
+	  ret = temp;
+	}
   } else {
 	/* here we should anally make sure AEID_input direction ends up in
 	   input_AEID.key == AEID_input.val being the same string */
-	blob_free(AEID);
-	ret = 0;
+	/* blob_free(AEID); */
+	ret = AEID;
   }
+
+  if (blob_null(ret))
+	return ret;
+
 
   return ret;
 }
 
 struct ukey say_add_event(struct db* fiber, struct blobs elems, struct ukey mark) {
   int i, status;
-  struct ukey dakey;
+  struct blob hid_key;
+  struct ukey dakey, temp;
 
-  mark = ukey_uniq(mark);
+  dakey = mark = ukey_uniq(mark);
 
   printf("%% event: "); ukey_print(mark); printf("\n");
   for (i = 0; i < elems.len; i++) {
-	dakey = ukey_uniq(mark);
-	printf("%% aevent: "); ukey_print(dakey); printf("\n");
-	status = say_add_atomic(fiber, elems.dat[i]);
-	printf("# say_add_event: say_add_atomic(%s) status(%d)\n", elems.dat[i], status);
+	dakey = ukey_uniq(dakey);
+	printf("; aevent: UID{"); ukey_print(dakey); printf("}\n");
+	hid_key = say_add_atomic(fiber, elems.dat[i], dakey);
+	/* printf("# say_add_event: say_add_atomic(%s) status(%d)\n", elems.dat[i], status); */
+	temp = blob2ukey(hid_key);
+	blob_free(hid_key);
+	printf("%% aevent: HID{"); ukey_print(temp); printf("}\n");
   }
   return dakey;
 }
