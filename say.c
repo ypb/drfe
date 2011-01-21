@@ -135,6 +135,8 @@ int say(int argc, char *argv[])
   struct ukey event = { -1,0,0 };
   /* it works but gcc warns: initializer element is not computable at load time */
   struct blobs atoms = { argc, argv };
+  struct blob test_bkey;
+  struct ukey test_ukey;
 
 #ifdef _SDEBUG
   int i;
@@ -155,6 +157,15 @@ int say(int argc, char *argv[])
   printf("%% say: dakey = "); ukey_print(event);
   printf(" sizeof is %i+%i+%i=%i\n", sizeof(event.seconds),
 		 sizeof(event.count), sizeof(event.epoch), sizeof(event));
+
+  /* testing */
+  test_bkey = ukey2blob(event);
+  printf("%% say: dakey = "); blob_rprint(test_bkey);
+  printf(" length is %i\n", test_bkey.len);
+  test_ukey = blob2ukey(test_bkey);
+  printf("%% say: dakey = "); ukey_print(test_ukey);
+  printf(" deblobeefied\n");
+  blob_free(test_bkey);
 
   event = say_add_event(snipper, atoms, event);
   printf("%% say: say_add_event status(%s)\n", ukey_null(event) == 0 ? "!null" : "null");

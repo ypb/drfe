@@ -27,6 +27,8 @@ void blob_free(struct blob);
 /* this could probably be just a macro see init_td_data in say.c */
 struct blob blob_static(char*);
 
+void blob_rprint(struct blob);
+
 /* "UNIVERSAL" KEY */
 
 struct ukey {
@@ -47,6 +49,9 @@ struct ukey ukey_make();
 /* make sure no key is identical AND all is well ordered...*/
 struct ukey ukey_uniq(struct ukey);
 /* i.e. passing last known good key should return "the next good one" */
+
+/* "The bytes 0xfe and 0xff are never used in the UTF-8 encoding." */
+#define MAGICBYTE 0xfe
 
 struct blob ukey2blob(struct ukey);
 struct ukey blob2ukey(struct blob);

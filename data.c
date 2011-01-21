@@ -41,6 +41,19 @@ struct blob blob_static(char* data) {
   return temp;
 }
 
+void blob_rprint(struct blob bob) {
+  int i, j=bob.len;
+  printf("blob(");
+  for (i = 0; i < j; i++) {
+	printf(" 0x%2.2x", (unsigned char)bob.dat[i]);
+  }
+  if (j > 0) {
+	printf(" )");
+  } else {
+	printf(")");
+  }
+}
+
 /* "UNIVERSAL" KEY */
 
 struct ukey ukey_make() {
@@ -80,6 +93,83 @@ struct ukey ukey_uniq(struct ukey last) {
 }
 
 void ukey_print(struct ukey out) {
-  printf("ukey(%i.%i.%i)", (int)out.epoch, (int)out.seconds, out.count);
+  printf("ukey(%i.%i(0x%x).%i)", (int)out.epoch,
+		 (int)out.seconds, (unsigned int)out.seconds,
+		 out.count);
+}
+
+/* for now, this is all not so bravely bit twiddly ;-o */
+struct blob ukey2blob(struct ukey key) {
+  /* to extract or not to extract, unelegant ;( */
+  time_t s; /* seconds */
+  unsigned int c; /* count */
+  unsigned char e; /* epoch */
+  size_t slen, clen, elen, Tlen;
+  char *blob, *temp;
+  struct blob ret = { NULL, 0 };
+
+  if (ukey_null(key))
+	return ret;
+
+  Tlen = 1;
+  s = key.seconds; slen = sizeof(s); Tlen += slen;
+  c = key.count; clen = sizeof(c); Tlen += clen;
+  /* because of char "mis-alignment"...
+	 perhaps agin this struct thing is not a good IDEA */
+  e = key.epoch; elen = sizeof(e); Tlen += elen;
+
+  blob = (char*)malloc(Tlen);
+  if (blob == NULL)
+	return ret;
+
+  /* printf("# ukey2blob: doing...\n"); */
+  /* warning: overflow in implicit constant conversion */
+  *blob = (char)MAGICBYTE; temp=blob+1;
+  memcpy(temp, &s, slen); temp+=slen;
+  memcpy(temp, &c, clen); temp+=clen;
+  memcpy(temp, &e, elen);
+  /* blob[10] = '\0'; */
+  ret.dat = blob;
+  ret.len = Tlen;
+
+  /* printf("# ukey2blob: done\n"); */
+  return ret;
+}
+/* jeez, that's so ugly... AND loooong... */
+struct ukey blob2ukey(struct blob bob) {
+  time_t s; /* seconds */
+  unsigned int c; /* count */
+  unsigned char e; /* epoch */
+  size_t slen, clen, elen, Tlen;
+  char* temp = bob.dat;
+  struct ukey ret = { -1, 0, 0 };
+
+  if (temp == NULL)
+	return ret;
+  if (*temp != (char)MAGICBYTE) {
+#ifdef _SDEBUG
+	printf("# blob2ukey: no MAGICBYTE found\n");
+#endif
+	return ret;
+  }
+
+  Tlen = 1;
+  slen = sizeof(s); Tlen += slen;
+  clen = sizeof(c); Tlen += clen;
+  elen = sizeof(e); Tlen += elen;
+
+  if (Tlen != bob.len)
+	return ret;
+
+  temp += 1;
+  memcpy(&s, temp, slen); temp+=slen;
+  memcpy(&c, temp, clen); temp+=clen;
+  memcpy(&e, temp, elen);
+  /* same "shit" with alignment... */
+  ret.seconds = s;
+  ret.count = c;
+  ret.epoch = e;
+
+  return ret;
 }
 
