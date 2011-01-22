@@ -45,6 +45,29 @@ struct blob blob_static(char* data) {
   return temp;
 }
 
+/* ah, damn, this will include '\0'... blobs are not strings
+   after ALL!1!1! blob_join for the "string" subcategory?!? */
+struct blob blob_concat(struct blob a, struct blob b) {
+  struct blob ret = { NULL, 0 };
+
+  if (blob_null(a) && blob_null(b))
+	return ret;
+  if (blob_null(a))
+	return blob_make(b.dat);
+  if (blob_null(b))
+	return blob_make(a.dat);
+
+  ret.dat = malloc(a.len + b.len);
+  if (ret.dat == NULL)
+	return ret;
+
+  memcpy(ret.dat, a.dat, a.len);
+  memcpy(ret.dat + a.len, b.dat, b.len);
+  ret.len = a.len + b.len;
+
+  return ret;
+}
+
 void blob_rprint(struct blob bob) {
   int i, j=bob.len;
   printf("blob(");

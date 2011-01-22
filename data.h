@@ -26,6 +26,7 @@ void blob_free(struct blob);
 
 /* this could probably be just a macro see init_td_data in say.c */
 struct blob blob_static(char*);
+struct blob blob_concat(struct blob, struct blob);
 
 int blob_null(struct blob);
 
