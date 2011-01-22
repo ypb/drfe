@@ -134,12 +134,38 @@ struct blob say_add_atomic(struct db* fiber, char* cdata, struct ukey mark)
   } else {
 	/* here we should anally make sure AEID_input direction ends up in
 	   input_AEID.key == AEID_input.val being the same string */
-	/* blob_free(AEID); */
+	/* blob_free(uid); */
+	last_id = store_restore(fiber, tail, uid);
+	if (blob_null(last_id)) {
+	  /* that CAN'T be... */
+	  printf("# say_add_atomic: error: no last_id for uid\n");
+	  goto guard;
+	}
+	data.key = current_id;
+	data.val = last_id;
+	status = store_extend(fiber, atomic, data);
+	if (status == -1) {
+	  printf("# say_add_atomic: error: current_id already preset\n");
+	  blob_free(last_id);
+	  goto guard;
+	}
+	data.key = uid;
+	data.val = current_id;
+	status = store_inside(fiber, tail, data);
+	if (status == -1) {
+	  printf("# say_add_atomic: error: tail last_id tail failure\n");
+	  blob_free(last_id);
+	  store_remove(fiber, atomic, current_id);
+	  goto guard;
+	}
 	blob_free(current_id);
 	return uid;
   }
 
-  return null_id;
+  guard:
+	blob_free(current_id);
+	blob_free(uid);
+	return null_id;
 }
 
 struct ukey say_add_event(struct db* fiber, struct blobs elems, struct ukey mark) {
