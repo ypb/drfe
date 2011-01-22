@@ -100,7 +100,7 @@ void say_follow_last(struct db* fiber, char* cdata, struct blob last_id, int tim
   }
 }
 
-struct blob say_add_atomic(struct db* fiber, char* cdata, struct ukey mark)
+struct blob say_add_atomic(struct db* fiber, char* cdata, struct ukey mark, struct blob ekey)
 {
   int status;
   struct kons data;
@@ -139,8 +139,12 @@ struct blob say_add_atomic(struct db* fiber, char* cdata, struct ukey mark)
 	if (status == -1) {
 	  goto f2;
 	}
-	data.val = current_id; /* here we need to construct something!1!! */
+	/* here we need to construct something!1!! */
+	data.val = blob_concat(ekey, current_id);
+	/* TOFIX: using current_id here is too loopy for the say_follow_last... */
 	status = store_extend(fiber, atomic, data);
+	/* free irrespective of result, as not needed further... */
+	blob_free(data.val);
 	if (status == -1) {
 	  goto f3;
 	}
@@ -161,15 +165,18 @@ struct blob say_add_atomic(struct db* fiber, char* cdata, struct ukey mark)
 	  goto guard;
 	}
 	data.key = current_id;
-	data.val = last_id;
+	/* here, too, blob concoction */
+	data.val = blob_concat(ekey, last_id);
 	status = store_extend(fiber, atomic, data);
+	blob_free(data.val);
 	if (status == -1) {
 	  printf("# say_add_atomic: error: current_id already preset\n");
 	  blob_free(last_id);
 	  goto guard;
 	}
 	/* follow da wabbit */
-	say_follow_last(fiber, cdata, last_id, 3);
+	/* say_follow_last(fiber, cdata, last_id, 3); */
+	/* rabbit chase needs to be modified and moved up */
 	data.key = uid;
 	data.val = current_id;
 	status = store_inside(fiber, tail, data);
@@ -212,7 +219,7 @@ struct ukey say_add_event(struct db* fiber, struct blobs elems, struct ukey mark
   for (i = 0; i < elems.len; i++) {
 	dakey = ukey_uniq(dakey);
 	printf("; aevent: UID{"); ukey_print(dakey); printf("}\n");
-	hid_key = say_add_atomic(fiber, elems.dat[i], dakey);
+	hid_key = say_add_atomic(fiber, elems.dat[i], dakey, eid_key);
 	/* printf("# say_add_event: say_add_atomic(%s) status(%d)\n", elems.dat[i], status); */
 	temp = blob2ukey(hid_key);
 	memcpy(buf.dat + buf.len, hid_key.dat, hid_key.len);
