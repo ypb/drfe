@@ -1,6 +1,10 @@
 
 #include <sys/stat.h>
 #include <stdio.h>
+/* malloc, free */
+#include <stdlib.h>
+/* memcpy */
+#include <string.h>
 #include <errno.h>
 
 #include "data.h"
@@ -187,11 +191,22 @@ struct blob say_add_atomic(struct db* fiber, char* cdata, struct ukey mark)
 }
 
 struct ukey say_add_event(struct db* fiber, struct blobs elems, struct ukey mark) {
+  struct kons data;
+  char* event = db_names[0]; /* "event" reg */
+  struct blob buf;
   int i, status;
-  struct blob hid_key;
+  struct blob eid_key, hid_key;
   struct ukey dakey, temp;
 
+  /* overcompensate */
+  buf.dat = malloc(elems.len*sizeof(mark));
+  if (buf.dat == NULL)
+	return mark;
+  /* getting queer */
+  buf.len = 0;
+
   dakey = mark = ukey_uniq(mark);
+  eid_key = ukey2blob(mark);
 
   printf("%% event: "); ukey_print(mark); printf("\n");
   for (i = 0; i < elems.len; i++) {
@@ -200,9 +215,22 @@ struct ukey say_add_event(struct db* fiber, struct blobs elems, struct ukey mark
 	hid_key = say_add_atomic(fiber, elems.dat[i], dakey);
 	/* printf("# say_add_event: say_add_atomic(%s) status(%d)\n", elems.dat[i], status); */
 	temp = blob2ukey(hid_key);
+	memcpy(buf.dat + buf.len, hid_key.dat, hid_key.len);
+	buf.len += hid_key.len;
 	blob_free(hid_key);
 	printf("%% aevent: HID{"); ukey_print(temp); printf("}\n");
   }
+
+  printf("# event_buf: "); blob_rprint(buf); putchar('\n');
+  data.key = eid_key;
+  data.val = buf;
+  status = store_extend(fiber, event, data);
+  if (status == -1) {
+	printf("# say_add_event: event buf storage failure\n");
+	/* oh, GOD, please no... TOFIX: ignoring for now... */
+  }
+  blob_free(buf);
+  blob_free(eid_key);
   return dakey;
 }
 
