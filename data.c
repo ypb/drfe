@@ -13,7 +13,7 @@ struct blob blob_make(char *str)
   struct blob ret;
   /* counting and storing delimiter \0 TOO */
   ret.len = strlen(str) + 1;
-  ret.dat = (char*)malloc(ret.len);
+  ret.dat = (char*)malloc(ret.len*sizeof(char));
   if (ret.dat == NULL) {
 	ret.len = 0;
 	perror("# blob_make: malloc failed");
@@ -57,7 +57,7 @@ struct blob blob_concat(struct blob a, struct blob b) {
   if (blob_null(b))
 	return blob_make(a.dat);
 
-  ret.dat = malloc(a.len + b.len);
+  ret.dat = (char*)malloc((a.len + b.len)*sizeof(char));
   if (ret.dat == NULL)
 	return ret;
 
@@ -159,7 +159,7 @@ struct blob ukey2blob(struct ukey key) {
 	 perhaps agin this struct thing is not a good IDEA */
   e = key.epoch; elen = sizeof(e); Tlen += elen;
 
-  blob = (char*)malloc(Tlen);
+  blob = (char*)malloc(Tlen*sizeof(char));
   if (blob == NULL)
 	return ret;
 
@@ -211,6 +211,30 @@ struct ukey blob2ukey(struct blob bob) {
   ret.count = c;
   ret.epoch = e;
 
+  return ret;
+}
+
+struct blobs ukeys_blob2blobs(struct blob ukeys) {
+  int i, len;
+  char* stream, *end;
+  struct blobs ret = { 0, NULL};
+
+  /* overassuming all ukeys are of minimal lenght */
+  len = (ukeys.len / MINUKEYLEN) + 1;
+  ret.dat = (char**)malloc(len*(sizeof(char*)));
+  if (ret.dat == NULL)
+	return ret;
+
+  /* that's riskee */
+  i = 0;
+  end = ukeys.dat + ukeys.len;
+  for (stream = ukeys.dat; stream < end && i < len; stream++) {
+	if (*stream == (char)MAGICBYTE) {
+	  ret.dat[i] = stream;
+	  i++;
+	}
+  }
+  ret.len = i;
   return ret;
 }
 

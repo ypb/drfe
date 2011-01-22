@@ -55,9 +55,12 @@ struct ukey ukey_uniq(struct ukey);
 
 /* "The bytes 0xfe and 0xff are never used in the UTF-8 encoding." */
 #define MAGICBYTE 0xfe
+#define MINUKEYLEN 6
 
 struct blob ukey2blob(struct ukey);
 struct ukey blob2ukey(struct blob);
+/* construct an array of pointers to individual ukeys in a continuous blob... */
+struct blobs ukeys_blob2blobs(struct blob);
 
 int ukey_null(struct ukey);
 void ukey_print(struct ukey);
