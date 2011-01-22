@@ -84,53 +84,62 @@ struct db* say_init(char *dir)
 struct blob say_add_atomic(struct db* fiber, char* cdata, struct ukey mark)
 {
   int status;
-  /* here key is textual cdata we are storing */
-  struct kons input_AEID;
-  /* and here value is that cdata if it's already present with an above AEID */
-  struct kons AEID_input;
-  /* it's not only slightly confusing me alone ;*/
+  struct kons data;
   /* dregs */
   char *head = db_names[1];
   char *atomic = db_names[2]; /* "atomic" */
   char *tail = db_names[3];
-  struct blob temp;
-  struct blob ret = { NULL, 0};
-
-  /* doing the input_AEID direction */
-  struct blob input = blob_static(cdata);
-  struct blob AEID = store_restore(fiber, head, input);
+  struct blob input, uid, current_id, last_id;
+  struct blob null_id = { NULL, 0};
 
   printf("%% aevent: cdata{%s}\n", cdata);
-  /* TODO: encapsulate in a fun? like blob_null or smth? */
-  if (blob_null(AEID)) {
-	/* for now val = key... i.e. cdata */
-	input_AEID.key = input;
-	/* but will need to generate "timed" key here as input's value */
-	/* mark = ukey_uniq(mark); */
-	temp = ukey2blob(mark);
-	input_AEID.val = temp;
-	status = store_extend(fiber, head, input_AEID);
+  /* mark = ukey_uniq(mark); */
+  current_id = ukey2blob(mark);
+  /* doing the input_AEID direction */
+  input = blob_static(cdata);
+  uid = store_restore(fiber, head, input);
+
+  if (blob_null(uid)) {
+	data.key = input;
+	data.val = current_id;
+	status = store_extend(fiber, head, data);
 	if (status == -1) {
-	  blob_free(temp);
+	  goto f0;
 	} else {
-	  AEID_input.key = temp;
-	  AEID_input.val = input;
-	  status = store_extend(fiber, head, AEID_input);
+	  data.key = current_id;
+	  data.val = input;
+	  status = store_extend(fiber, head, data);
 	  /* TOFIX: this shouldn't fail... */
-	  ret = temp;
+	  if (status == -1) {
+		goto f1;
+	  }
 	}
+	data.key = current_id;
+	data.val = current_id;
+	status = store_extend(fiber, tail, data);
+	if (status == -1) {
+	  goto f2;
+	}
+	data.val = current_id; /* here we need to construct something!1!! */
+	status = store_extend(fiber, atomic, data);
+	if (status == -1) {
+	  goto f3;
+	}
+	return current_id;
+  f3:	store_remove(fiber, tail, current_id);
+  f2:	store_remove(fiber, head, current_id);
+  f1:	store_remove(fiber, head, input);
+  f0:	blob_free(current_id);
+		return null_id;
   } else {
 	/* here we should anally make sure AEID_input direction ends up in
 	   input_AEID.key == AEID_input.val being the same string */
 	/* blob_free(AEID); */
-	ret = AEID;
+	blob_free(current_id);
+	return uid;
   }
 
-  if (blob_null(ret))
-	return ret;
-
-
-  return ret;
+  return null_id;
 }
 
 struct ukey say_add_event(struct db* fiber, struct blobs elems, struct ukey mark) {
