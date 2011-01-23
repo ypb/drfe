@@ -85,11 +85,45 @@ struct db* say_init(char *dir)
   return ret;
 }
 
+void say_print_event(struct db* fiber, struct ukey eid) {
+  int i;
+  struct blob event_key;
+  struct blob event_data;
+  struct ablobs aevents;
+  char *event = db_names[0];
+  char *head = db_names[1];
+
+  event_key = ukey2blob(eid);
+  /* check if null? */
+  event_data = store_restore(fiber, event, event_key);
+  blob_free(event_key);
+  if (blob_null(event_data))
+	return;
+
+  aevents = ukeys_blob2ablobs(event_data);
+  if (aevents.len == 0) {
+	blob_free(event_data);
+	return;
+  }
+  ukey_hprint(eid);
+  for (i = 0; i < aevents.len; i++) {
+	/* recycle event_key though it's aevent cdata now! */
+	event_key = store_restore(fiber, head, aevents.dat[i]);
+	if (blob_null(event_key))
+	  continue;
+	printf(" %s", event_key.dat);
+	blob_free(event_key);
+  }
+  putchar('\n');
+  free(aevents.dat);
+  blob_free(event_data);
+}
+
 void say_follow_last(struct db* fiber, char* cdata, struct blob last_id, int times) {
   int i;
   struct ablobs ukeys;
   struct blob temp;
-  struct ukey previous;
+  struct ukey event, previous;
   char *atomic = db_names[2];
 
   for (i = 0; i < times; i++) {
@@ -108,10 +142,14 @@ void say_follow_last(struct db* fiber, char* cdata, struct blob last_id, int tim
 		free(ukeys.dat);
 	  break;
 	}
+	event = blob2ukey(ukeys.dat[0]);
 	/* need blob_clone... hmm...*/
 	previous = blob2ukey(ukeys.dat[1]);
-	printf("%s event: ", cdata); ukey_hprint(blob2ukey(ukeys.dat[0]));
+#ifdef _SDEBUG
+	printf("%s event: ", cdata); ukey_hprint(event);
 	printf(" previous: "); ukey_hprint(previous); putchar('\n');
+#endif
+	say_print_event(fiber, event);
 
 	blob_free(temp);
 	if (ukeys.dat != NULL)
