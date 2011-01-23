@@ -104,7 +104,9 @@ struct ukey ukey_uniq(struct ukey last) {
   new = ukey_make();
   /* start pessimistic */
   if (ukey_null(last)) {
+#ifdef _SDEBUG
 	printf("%% ukey_uniq: last ukey encountered null\n");
+#endif
 	return new;
   }
   /* caller should check if new is null...

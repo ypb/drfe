@@ -174,7 +174,9 @@ struct blob say_add_atomic(struct db* fiber, char* cdata, struct ukey mark, stru
   struct blob input, uid, current_id, last_id;
   struct blob null_id = { NULL, 0};
 
+#ifdef _SDEBUG
   printf("%% aevent: cdata{%s}\n", cdata);
+#endif
   /* mark = ukey_uniq(mark); */
   current_id = ukey2blob(mark);
   /* doing the input_AEID direction */
@@ -281,20 +283,28 @@ struct ukey say_add_event(struct db* fiber, struct blobs elems, struct ukey mark
   dakey = mark = ukey_uniq(mark);
   eid_key = ukey2blob(mark);
 
+#ifdef _SDEBUG
   printf("%% event: "); ukey_print(mark); printf("\n");
+#endif
   for (i = 0; i < elems.len; i++) {
 	dakey = ukey_uniq(dakey);
+#ifdef _SDEBUG
 	printf("; aevent: UID{"); ukey_print(dakey); printf("}\n");
+#endif
 	hid_key = say_add_atomic(fiber, elems.dat[i], dakey, eid_key);
 	/* printf("# say_add_event: say_add_atomic(%s) status(%d)\n", elems.dat[i], status); */
 	temp = blob2ukey(hid_key);
 	memcpy(buf.dat + buf.len, hid_key.dat, hid_key.len);
 	buf.len += hid_key.len;
 	blob_free(hid_key);
+#ifdef _SDEBUG
 	printf("%% aevent: HID{"); ukey_print(temp); printf("}\n");
+#endif
   }
 
+#ifdef _SDEBUG
   printf("# event_buf: "); blob_rprint(buf); putchar('\n');
+#endif
   data.key = eid_key;
   data.val = buf;
   status = store_extend(fiber, event, data);
@@ -330,6 +340,8 @@ struct ukey say_events_continue(struct db* fiber) {
   return ret;
 }
 
+void say_ukeyblob_test(const char*, struct ukey);
+
 int say(int argc, char *argv[])
 {
   int status;
@@ -338,8 +350,6 @@ int say(int argc, char *argv[])
   struct ukey now = { -1,0,0 };
   /* it works but gcc warns: initializer element is not computable at load time */
   struct blobs atoms = { argc, argv };
-  struct blob test_bkey;
-  struct ukey test_ukey;
 
 #ifdef _SDEBUG
   int i;
@@ -361,18 +371,14 @@ int say(int argc, char *argv[])
   now = ukey_uniq(now);
   printf("; now: "); ukey_hprint(now); putchar('\n');
 
-  /* testing */
-  printf("# say: ukey_vs_blob test start\n");
-  printf("%% say: now = "); ukey_print(now); putchar('\n');
-  test_bkey = ukey2blob(now);
-  printf("%% say: now = "); blob_rprint(test_bkey); putchar('\n');
-  test_ukey = blob2ukey(test_bkey);
-  printf("%% say: now = "); ukey_print(test_ukey); putchar('\n');
-  blob_free(test_bkey);
-  printf("# say: ukey_vs_blob end\n");
+#ifdef _SDEBUG
+  say_ukeyblob_test("now", now);
+#endif
 
   tot = say_add_event(snipper, atoms, tot);
+#ifdef _SDEBUG
   printf("%% say: say_add_event status(%s)\n", ukey_null(tot) == 0 ? "!null" : "null");
+#endif
 
 
   status = store_close(snipper);
@@ -383,5 +389,18 @@ int say(int argc, char *argv[])
 	return 64;
 
   return 0;
+}
+
+void say_ukeyblob_test(const char* name, struct ukey test) {
+  struct blob test_bkey;
+  /* testing */
+  printf("# say_ukeyblob_test: start\n");
+  printf("%%  original: %s = ", name); ukey_print(test); putchar('\n');
+  test_bkey = ukey2blob(test);
+  printf("%% converted: %s = ", name); blob_rprint(test_bkey); putchar('\n');
+  test = blob2ukey(test_bkey);
+  printf("%%  reverted: %s = ", name); ukey_print(test); putchar('\n');
+  blob_free(test_bkey);
+  printf("# say_ukeyblob_test: end\n");
 }
 
