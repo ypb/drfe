@@ -52,6 +52,7 @@ struct ukey {
   byte for 2^11 (~mili-) and upto 2^20 (micro-second) "resolution"...
 */
 
+struct ukey null_ukey();
 /* start ukeying now! */
 struct ukey ukey_make();
 /* make sure no key is identical AND all is well ordered...*/

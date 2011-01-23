@@ -83,6 +83,11 @@ void blob_rprint(struct blob bob) {
 
 /* "UNIVERSAL" KEY */
 
+struct ukey null_ukey() {
+  struct ukey before_unix = { -1, 0, 0 };
+  return before_unix;
+}
+
 struct ukey ukey_make() {
   /* "non-null" init */
   struct ukey temp = { 0, 0, 0 };
@@ -149,8 +154,10 @@ struct blob ukey2blob(struct ukey key) {
   char *blob, *temp;
   struct blob ret = { NULL, 0 };
 
+  /* allow null_ukey blob after all
   if (ukey_null(key))
 	return ret;
+  */
 
   Tlen = 1;
   s = key.seconds; slen = sizeof(s); Tlen += slen;
@@ -185,6 +192,7 @@ struct ukey blob2ukey(struct blob bob) {
   char* temp = bob.dat;
   struct ukey ret = { -1, 0, 0 };
 
+  /* after all we return null_ukey on NULL blob... */
   if (temp == NULL)
 	return ret;
   if (*temp != (char)MAGICBYTE) {
