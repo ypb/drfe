@@ -214,27 +214,39 @@ struct ukey blob2ukey(struct blob bob) {
   return ret;
 }
 
-struct blobs ukeys_blob2blobs(struct blob ukeys) {
-  int i, len;
+/* well, we do need individuals' lengths */
+struct ablobs ukeys_blob2ablobs(struct blob ukeys) {
+  int i, len, j;
   char* stream, *end;
-  struct blobs ret = { 0, NULL};
+  struct blob temp;
+  struct ablobs ret = { 0, NULL};
 
-  /* overassuming all ukeys are of minimal lenght */
+  if (ukeys.dat == NULL || (*ukeys.dat != (char)MAGICBYTE))
+	return ret;
+
+  /* overassuming all ukeys are of minimal length */
   len = (ukeys.len / MINUKEYLEN) + 1;
-  ret.dat = (char**)malloc(len*(sizeof(char*)));
+  ret.dat = (struct blob*)malloc(len*(sizeof(struct blob)));
   if (ret.dat == NULL)
 	return ret;
 
-  /* that's riskee */
-  i = 0;
+  temp.dat = ukeys.dat;
+  /* that's all wery, wery riskee */
   end = ukeys.dat + ukeys.len;
-  for (stream = ukeys.dat; stream < end && i < len; stream++) {
+  for (i = 0, stream = ukeys.dat + 1, j = 1;
+	   stream < end && i < len;
+	   stream++, j++) {
 	if (*stream == (char)MAGICBYTE) {
-	  ret.dat[i] = stream;
+	  temp.len = j;
+	  ret.dat[i] = temp;
 	  i++;
+	  temp.dat = stream;
+	  j = 0;
 	}
   }
-  ret.len = i;
+  temp.len = j;
+  ret.dat[i] = temp;
+  ret.len = i+1;
   return ret;
 }
 

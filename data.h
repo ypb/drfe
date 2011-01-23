@@ -20,6 +20,11 @@ struct blobs {
   char* *dat;
 };
 
+struct ablobs {
+  int len;
+  struct blob* dat;
+};
+
 /* malloccy stuff */
 struct blob blob_make(char*);
 void blob_free(struct blob);
@@ -60,7 +65,7 @@ struct ukey ukey_uniq(struct ukey);
 struct blob ukey2blob(struct ukey);
 struct ukey blob2ukey(struct blob);
 /* construct an array of pointers to individual ukeys in a continuous blob... */
-struct blobs ukeys_blob2blobs(struct blob);
+struct ablobs ukeys_blob2ablobs(struct blob);
 
 int ukey_null(struct ukey);
 void ukey_print(struct ukey);

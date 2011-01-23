@@ -86,17 +86,37 @@ struct db* say_init(char *dir)
 }
 
 void say_follow_last(struct db* fiber, char* cdata, struct blob last_id, int times) {
-  int i, status;
+  int i;
+  struct ablobs ukeys;
   struct blob temp;
+  struct ukey previous;
   char *atomic = db_names[2];
 
-  printf("%s ", cdata); ukey_hprint(blob2ukey(last_id)); putchar('\n');
-  last_id = store_restore(fiber, atomic, last_id);
-  for (i = 1; i < times; i++) {
-	printf("%s ", cdata); ukey_hprint(blob2ukey(last_id)); putchar('\n');
-	temp = last_id;
-	last_id = store_restore(fiber, atomic, temp);
+  for (i = 0; i < times; i++) {
+	temp = store_restore(fiber, atomic, last_id);
+	blob_free(last_id);
+	if (blob_null(temp))
+	  break;
+	ukeys = ukeys_blob2ablobs(temp);
+	/* perhaps make sure we got what we were asking for */
+#ifdef _SDEBUG
+	printf("# say_follow_last: ablobs.len = %i\n", ukeys.len);
+#endif
+	if (ukeys.len < 2) {
+	  blob_free(temp);
+	  if (ukeys.dat != NULL)
+		free(ukeys.dat);
+	  break;
+	}
+	/* need blob_clone... hmm...*/
+	previous = blob2ukey(ukeys.dat[1]);
+	printf("%s event: ", cdata); ukey_hprint(blob2ukey(ukeys.dat[0]));
+	printf(" previous: "); ukey_hprint(previous); putchar('\n');
+	last_id = ukey2blob(previous);
+
 	blob_free(temp);
+	if (ukeys.dat != NULL)
+	  free(ukeys.dat);
   }
 }
 
@@ -174,9 +194,6 @@ struct blob say_add_atomic(struct db* fiber, char* cdata, struct ukey mark, stru
 	  blob_free(last_id);
 	  goto guard;
 	}
-	/* follow da wabbit */
-	/* say_follow_last(fiber, cdata, last_id, 3); */
-	/* rabbit chase needs to be modified and moved up */
 	data.key = uid;
 	data.val = current_id;
 	status = store_inside(fiber, tail, data);
@@ -186,7 +203,11 @@ struct blob say_add_atomic(struct db* fiber, char* cdata, struct ukey mark, stru
 	  store_remove(fiber, atomic, current_id);
 	  goto guard;
 	}
-	blob_free(last_id);
+	/* follow da wabbit, awkward for now... */
+	say_follow_last(fiber, cdata, last_id, 3);
+	/* TODO: return smarter structure to pass it onto _add_event...*/
+	/* blob_free(last_id); */
+	/* says_follows_lasts frees thems lasts as its goes... */
 	blob_free(current_id);
 	return uid;
   }
