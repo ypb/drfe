@@ -251,7 +251,7 @@ struct blob say_add_atomic(struct db* fiber, char* cdata, struct ukey mark, stru
 	  goto guard;
 	}
 	/* follow da wabbit, awkward for now... */
-	say_follow_last(fiber, cdata, last_id, 5);
+	say_follow_last(fiber, cdata, last_id, 7);
 	/* TODO: return smarter structure to pass it onto _add_event...*/
 	/* blob_free(last_id); */
 	/* says_follows_lasts frees thems lasts as its goes... */
@@ -340,6 +340,37 @@ struct ukey say_events_continue(struct db* fiber) {
   return ret;
 }
 
+void ask(struct db* fiber, struct blobs args)
+{
+  int i, depth;
+  char* head = db_names[1];
+  char* tail = db_names[3];
+  struct blob input;
+  struct blob uid;
+  struct blob last_id;
+
+  if (args.len <= 0)
+	return;
+  /* terminal height... TODO: try to determine dynamically */
+  depth = 36 / args.len;
+  /* about twice the "absolut" minimum of the 80x20 "standard" */
+  printf("%% Proście, a będzie wam dane;\n %% szukajcie, a znajdziecie;\n%% kołaczcie, a otworzą wam.\n");
+  for (i = 0; i < args.len; i++) {
+#ifdef _SDEBUG
+	printf("# ask: argv[%i]=\"%s\"\n", i, args.dat[i]);
+#endif
+	input = blob_static(args.dat[i]);
+	uid = store_restore(fiber, head, input);
+	if (blob_null(uid))
+	  continue;
+	last_id = store_restore(fiber, tail, uid);
+	blob_free(uid);
+	if (blob_null(last_id))
+	  continue;
+	say_follow_last(fiber, args.dat[i], last_id, depth);
+  }
+}
+
 void say_ukeyblob_test(const char*, struct ukey);
 
 int say(int argc, char *argv[])
@@ -375,10 +406,19 @@ int say(int argc, char *argv[])
   say_ukeyblob_test("now", now);
 #endif
 
+  if (argc > 0) {
+	if (strcmp(argv[0], "ask") == 0) {
+	  atoms.len -= 1; atoms.dat += 1;
+	  ask(snipper, atoms);
+	} else if (strcmp(argv[0], "say") == 0) {
+	  atoms.len -= 1; atoms.dat += 1;
+
   tot = say_add_event(snipper, atoms, tot);
 #ifdef _SDEBUG
   printf("%% say: say_add_event status(%s)\n", ukey_null(tot) == 0 ? "!null" : "null");
 #endif
+	}
+  }
 
 
   status = store_close(snipper);
