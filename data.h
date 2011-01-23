@@ -71,3 +71,4 @@ struct ablobs ukeys_blob2ablobs(struct blob);
 int ukey_null(struct ukey);
 void ukey_print(struct ukey);
 void ukey_hprint(struct ukey);
+void ukey_sprint(struct ukey);

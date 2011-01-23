@@ -105,7 +105,7 @@ void say_print_event(struct db* fiber, struct ukey eid) {
 	blob_free(event_data);
 	return;
   }
-  ukey_hprint(eid);
+  printf("; "); ukey_sprint(eid); printf(" ;");
   for (i = 0; i < aevents.len; i++) {
 	/* recycle event_key though it's aevent cdata now! */
 	event_key = store_restore(fiber, head, aevents.dat[i]);

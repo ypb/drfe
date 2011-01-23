@@ -146,6 +146,15 @@ void ukey_hprint(struct ukey out) {
   printf("%s", stime);
 }
 
+void ukey_sprint(struct ukey out) {
+  char stime[64];
+  struct tm* time;
+
+  time = localtime(&out.seconds);
+  strftime(stime, 64, "%y%m%d %H%M", time);
+  printf("%s", stime);
+}
+
 /* for now, this is all not so bravely bit twiddly ;-o */
 struct blob ukey2blob(struct ukey key) {
   /* to extract or not to extract, unelegant ;( */
