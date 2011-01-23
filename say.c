@@ -112,11 +112,16 @@ void say_follow_last(struct db* fiber, char* cdata, struct blob last_id, int tim
 	previous = blob2ukey(ukeys.dat[1]);
 	printf("%s event: ", cdata); ukey_hprint(blob2ukey(ukeys.dat[0]));
 	printf(" previous: "); ukey_hprint(previous); putchar('\n');
-	last_id = ukey2blob(previous);
 
 	blob_free(temp);
 	if (ukeys.dat != NULL)
 	  free(ukeys.dat);
+	/* break the cycle */
+	if (ukey_null(previous)) {
+	  break;
+	} else {
+	  last_id = ukey2blob(previous);
+	}
   }
 }
 
@@ -159,11 +164,13 @@ struct blob say_add_atomic(struct db* fiber, char* cdata, struct ukey mark, stru
 	if (status == -1) {
 	  goto f2;
 	}
+	last_id = ukey2blob(null_ukey());
 	/* here we need to construct something!1!! */
-	data.val = blob_concat(ekey, current_id);
+	data.val = blob_concat(ekey, last_id);
 	/* TOFIX: using current_id here is too loopy for the say_follow_last... */
 	status = store_extend(fiber, atomic, data);
 	/* free irrespective of result, as not needed further... */
+	blob_free(last_id);
 	blob_free(data.val);
 	if (status == -1) {
 	  goto f3;
@@ -204,7 +211,7 @@ struct blob say_add_atomic(struct db* fiber, char* cdata, struct ukey mark, stru
 	  goto guard;
 	}
 	/* follow da wabbit, awkward for now... */
-	say_follow_last(fiber, cdata, last_id, 3);
+	say_follow_last(fiber, cdata, last_id, 5);
 	/* TODO: return smarter structure to pass it onto _add_event...*/
 	/* blob_free(last_id); */
 	/* says_follows_lasts frees thems lasts as its goes... */
