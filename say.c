@@ -11,7 +11,10 @@
 #include "store.h"
 
 /* for now it's a sub-directory... relative to cwd of the exec()utor */
-#define ROOTPATH ".say_store"
+#define ROOTPATH ".drfe"
+#define MAJOR 0
+#define MINOR 1
+#define PATCH 0
 
 #define init_td_data(x) { (unsigned char*)x, sizeof(x) }
 
@@ -54,6 +57,9 @@ struct db* say_init(char *dir)
 		perror("# say_init: mkdir ROOTPATH failed") ;
 		return ret ;
 	  }
+	  /* it's a surprising behaviour for now, so inform unsuspecting by-standers */
+	  printf("# drfe init: created `%s' directory\n", ROOTPATH);
+	  /* TODO: prepend CWD for disconfundum... */
 	  /* oh, and for a moment i thought struct stat st_mode updates itself dynamically, LOL */
 	  status = stat(dir, &buffer) ;
 	  break;
@@ -354,7 +360,6 @@ void ask(struct db* fiber, struct blobs args)
   /* terminal height... TODO: try to determine dynamically */
   depth = 36 / args.len;
   /* about twice the "absolut" minimum of the 80x20 "standard" */
-  printf("%% Proście, a będzie wam dane;\n %% szukajcie, a znajdziecie;\n%% kołaczcie, a otworzą wam.\n");
   for (i = 0; i < args.len; i++) {
 #ifdef _SDEBUG
 	printf("# ask: argv[%i]=\"%s\"\n", i, args.dat[i]);
@@ -373,6 +378,19 @@ void ask(struct db* fiber, struct blobs args)
 
 void say_ukeyblob_test(const char*, struct ukey);
 
+void version() {
+  printf("v%u.%u.%u", MAJOR, MINOR, PATCH);
+}
+
+void banner() {
+  printf("; DrFe "); version(); printf(" (C)(R) 2011 ypb\n");
+  printf("%% Proście, a będzie wam dane;\n %% szukajcie, a znajdziecie;\n%% kołaczcie, a otworzą wam.\n");
+}
+
+void help() {
+  printf("  Usage: drfe [say|ask] ...\n");
+}
+
 int say(int argc, char *argv[])
 {
   int status;
@@ -381,6 +399,11 @@ int say(int argc, char *argv[])
   struct ukey now = { -1,0,0 };
   /* it works but gcc warns: initializer element is not computable at load time */
   struct blobs atoms = { argc, argv };
+
+  /* a feeble fix */
+  if (argc <= 0) {
+	banner(); help(); return 0;
+  }
 
 #ifdef _SDEBUG
   int i;
@@ -397,10 +420,10 @@ int say(int argc, char *argv[])
 #endif
 
   tot = say_events_continue(snipper);
-  printf("; tot: "); ukey_hprint(tot); putchar('\n');
+  printf("; "); ukey_hprint(tot); printf(" ; tot\n");
   /* starting off the null end ... recycle gdg? hmmm...*/
   now = ukey_uniq(now);
-  printf("; now: "); ukey_hprint(now); putchar('\n');
+  printf("; "); ukey_hprint(now); printf(" ; now\n");
 
 #ifdef _SDEBUG
   say_ukeyblob_test("now", now);
@@ -417,6 +440,9 @@ int say(int argc, char *argv[])
 #ifdef _SDEBUG
   printf("%% say: say_add_event status(%s)\n", ukey_null(tot) == 0 ? "!null" : "null");
 #endif
+	} else {
+	  /* TOFIX */
+	  help();
 	}
   }
 

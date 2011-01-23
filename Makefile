@@ -16,7 +16,8 @@ INCS=say.h store.h data.h
 SRCS=main.c say.c store.c data.c
 OBJS=$(SRCS:%.c=%.o)
 
-SCRIPTS=scripts/say scripts/ask
+SCRIPTS=say ask
+SCRIPT=$(SCRIPTS:%=script/%)
 
 #all: depend drfe
 
@@ -31,7 +32,7 @@ data.o: data.c data.h
 
 install: $(BIN)
 		mkdir -p $(DESTDIR)$(prefix)/bin
-		for f in $(BIN) $(SCRIPTS); do \
+		for f in $(BIN) $(SCRIPT); do \
 		  install $$f $(DESTDIR)$(prefix)/bin ; \
 		done
 
