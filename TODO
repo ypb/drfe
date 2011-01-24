@@ -1,0 +1,17 @@
+
+Random thoughts while using actually doing "something" useful v0.1.0:
+
+ * implement "null" say/ask behaviour:
+   - say "knows" what to search for but perhaps ask could, too, without disturbing the first...
+   - hmmm... a sort of staging area?!?
+   - fsm?
+ * extricate "drfe command switch" -> the problem of language and syntemantics
+
+ * "relative" time formatting
+ * reverse order of the printout with "tot" topwise and "now" at the bottom, always!
+ * temporal events (i.e. basic start/stop) and time "overlays" (morning as a start of "a day")
+
+ * creating .drfe dir in cwd is "cute" but DO tie it into some "root" place...
+
+ * single worded "says" are queer e.g. URL without at least single tag is not so meaningful
+

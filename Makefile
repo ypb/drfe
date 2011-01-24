@@ -22,7 +22,7 @@ SCRIPT=$(SCRIPTS:%=script/%)
 #all: depend drfe
 
 $(BIN): $(OBJS)
-		$(CC) $(LDFLAGS) -o $@ $^
+	$(CC) $(LDFLAGS) -o $@ $^
 
 main.o: main.c say.h
 
@@ -31,11 +31,11 @@ say.o: say.c store.h
 data.o: data.c data.h
 
 install: $(BIN)
-		mkdir -p $(DESTDIR)$(prefix)/bin
-		for f in $(BIN) $(SCRIPT); do \
-		  install $$f $(DESTDIR)$(prefix)/bin ; \
-		done
+	mkdir -p $(DESTDIR)$(prefix)/bin
+	for f in $(BIN) $(SCRIPT); do \
+	  install $$f $(DESTDIR)$(prefix)/bin ; \
+	done
 
 clean:
-		rm -f *~ $(OBJS) $(BIN)
+	rm -f *~ $(OBJS) $(BIN)
 

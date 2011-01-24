@@ -383,7 +383,7 @@ void version() {
 }
 
 void banner() {
-  printf("; DrFe "); version(); printf(" (C)(R) 2011 ypb\n");
+  printf("; DrFe "); version(); printf(" GNU GPL3 (c)(r) 2011 ypb\n");
   printf("%% Proście, a będzie wam dane;\n %% szukajcie, a znajdziecie;\n%% kołaczcie, a otworzą wam.\n");
 }
 
