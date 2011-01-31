@@ -12,6 +12,23 @@ Random thoughts while using actually doing "something" useful v0.1.0:
  * temporal events (i.e. basic start/stop) and time "overlays" (morning as a start of "a day")
 
  * creating .drfe dir in cwd is "cute" but DO tie it into some "root" place...
+   cwd could "spatially" determine temporal priority of events having been said "here"
+   even though they happened before "root" events or events in order places...
 
  * single worded "says" are queer e.g. URL without at least single tag is not so meaningful
+
+ * implement revert/editing... of the past or at least immediate oopses ;}
+
+DETAILS:
+
+ * in "reaction": do not print duplicate events, silly boy...
+ * in "ask": do not print atomic query event
+ * ponder duplicate events... ask doesn't modify content but "some weights of order"...
+   it "bubbles" events up to the front in the linked-list chain...
+ * a kind of spacio-temporal vocabulary say/voice ask/tabulate tell/narly ;-p
+
+DUMB:
+
+ * lol, but that "utf-8 strings" are guaranteed to not contain 0xFe, doesn't mean ukey can't,
+   so it looks like using it as delimiter in blobs of ukeys is completely dumb idea, meh
 
