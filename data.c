@@ -204,8 +204,12 @@ struct ukey blob2ukey(struct blob bob) {
   struct ukey ret = { -1, 0, 0 };
 
   /* after all we return null_ukey on NULL blob... */
-  if (temp == NULL)
+  if (temp == NULL) {
+#ifdef _SDEBUG
+	printf("# blob2ukey: NULL blob detected\n");
+#endif
 	return ret;
+  }
   if (*temp != (char)MAGICBYTE) {
 #ifdef _SDEBUG
 	printf("# blob2ukey: no MAGICBYTE found\n");
@@ -218,8 +222,12 @@ struct ukey blob2ukey(struct blob bob) {
   clen = sizeof(c); Tlen += clen;
   elen = sizeof(e); Tlen += elen;
 
-  if (Tlen != bob.len)
+  if (Tlen != bob.len) {
+#ifdef _SDEBUG
+	printf("# blob2ukey: blob/ukey length mismatch\n");
+#endif
 	return ret;
+  }
 
   temp += 1;
   memcpy(&s, temp, slen); temp+=slen;
@@ -234,7 +242,7 @@ struct ukey blob2ukey(struct blob bob) {
 }
 
 /* well, we do need individuals' lengths */
-struct ablobs ukeys_blob2ablobs(struct blob ukeys) {
+struct ablobs __ukeys_blob2ablobs(struct blob ukeys) {
   int i, len, j;
   char* stream, *end;
   struct blob temp;
@@ -269,3 +277,54 @@ struct ablobs ukeys_blob2ablobs(struct blob ukeys) {
   return ret;
 }
 
+/*
+#define member_size(type, member) sizeof(((type *)0)->member)
+sizeof(((parent_t){0}).text)
+#define member_sizeof(T,F) sizeof(((T *)0)->F)
+*/
+
+/* the latter seems nicer but: "warning: ISO C90 forbids compound literals" */
+#define sizeof_member(type, member) sizeof(((type *)0)->member)
+/* #define sizeof_member(type, member) sizeof(((type){0}).member) */
+
+/*
+  TODO: above function is wrong because ukey can contain MAGICBYTE...
+  but with variable length ukey this will get over-complicated i.e.
+  invent better data structure?
+*/
+struct ablobs ukeys_blob2ablobs(struct blob ukeys) {
+  int i, len, j, ukeylen;
+  char* stream, *end;
+  struct blob temp;
+  struct ablobs ret = { 0, NULL};
+
+  if (ukeys.dat == NULL || (*ukeys.dat != (char)MAGICBYTE))
+	return ret;
+
+  ukeylen = 1 + sizeof_member(struct ukey, seconds);
+  ukeylen += sizeof_member(struct ukey, count);
+  ukeylen += sizeof_member(struct ukey, epoch);
+#ifdef _SDEBUG
+  printf("# ukeys_blob2ablobs: dynamic ukey length = %d\n", ukeylen);
+#endif
+  /* TODO: static size, will have to redo on variable length ukeyblob */
+  len = (ukeys.len / ukeylen);
+  ret.dat = (struct blob*)malloc(len*(sizeof(struct blob)));
+  if (ret.dat == NULL)
+	return ret;
+
+  /* that's all wery, wery riskee */
+  end = ukeys.dat + ukeys.len;
+  for (i = 0, stream = ukeys.dat;
+	   stream < end && i < len;
+	   stream += ukeylen, i++) {
+	if (*stream == (char)MAGICBYTE) {
+	  temp.dat = stream;
+	  temp.len = ukeylen;
+	  ret.dat[i] = temp;
+	}
+  }
+
+  ret.len = i;
+  return ret;
+}
