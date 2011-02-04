@@ -126,12 +126,14 @@ void say_print_event(struct db* fiber, struct ukey eid) {
 }
 
 void say_follow_last(struct db* fiber, char* cdata, struct blob last_id, int times) {
-  int i;
+  int i, j;
   struct ablobs ukeys;
   struct blob temp;
   struct ukey event, previous;
+  struct ukey events[times];
   char *atomic = db_names[2];
 
+  j = -1; /* found nothing so far */
   for (i = 0; i < times; i++) {
 	temp = store_restore(fiber, atomic, last_id);
 	blob_free(last_id);
@@ -155,7 +157,9 @@ void say_follow_last(struct db* fiber, char* cdata, struct blob last_id, int tim
 	printf("%s event: ", cdata); ukey_hprint(event);
 	printf(" previous: "); ukey_hprint(previous); putchar('\n');
 #endif
-	say_print_event(fiber, event);
+	/* say_print_event(fiber, event); */
+	events[i] = event;
+	j++;
 
 	blob_free(temp);
 	if (ukeys.dat != NULL)
@@ -166,6 +170,10 @@ void say_follow_last(struct db* fiber, char* cdata, struct blob last_id, int tim
 	} else {
 	  last_id = ukey2blob(previous);
 	}
+  }
+  /* now, print anything found in REVERSE order */
+  for (i = j; i >= 0; i--) {
+	say_print_event(fiber, events[i]);
   }
 }
 
@@ -423,7 +431,6 @@ int say(int argc, char *argv[])
   printf("; "); ukey_hprint(tot); printf(" ; tot\n");
   /* starting off the null end ... recycle gdg? hmmm...*/
   now = ukey_uniq(now);
-  printf("; "); ukey_hprint(now); printf(" ; now\n");
 
 #ifdef _SDEBUG
   say_ukeyblob_test("now", now);
@@ -446,7 +453,7 @@ int say(int argc, char *argv[])
 	}
   }
 
-
+  printf("; "); ukey_hprint(now); printf(" ; now\n");
   status = store_close(snipper);
 #ifdef _SDEBUG
   printf("# say: store_close->%i\n", status);
