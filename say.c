@@ -9,12 +9,10 @@
 
 #include "data.h"
 #include "store.h"
+#include "version.h"
 
 /* for now it's a sub-directory... relative to cwd of the exec()utor */
 #define ROOTPATH ".drfe"
-#define MAJOR 0
-#define MINOR 1
-#define PATCH 0
 
 #define init_td_data(x) { (unsigned char*)x, sizeof(x) }
 
@@ -386,21 +384,11 @@ void ask(struct db* fiber, struct blobs args)
 
 void say_ukeyblob_test(const char*, struct ukey);
 
-void version() {
-  printf("v%u.%u.%u", MAJOR, MINOR, PATCH);
-}
-
-void banner() {
-  printf("; DrFe "); version(); printf(" GNU GPL3 (c)(r) 2011 ypb\n");
-  printf("%% Proście, a będzie wam dane;\n %% szukajcie, a znajdziecie;\n%% kołaczcie, a otworzą wam.\n");
-}
-
-void help() {
-  printf("  Usage: drfe [say|ask] ...\n");
-}
-
 int say(int argc, char *argv[])
 {
+#ifdef _SDEBUG
+  int i;
+#endif
   int status;
   struct db* snipper;
   struct ukey tot; /* tip of tehvents */
@@ -410,11 +398,10 @@ int say(int argc, char *argv[])
 
   /* a feeble fix */
   if (argc <= 0) {
-	banner(); help(); return 0;
+	drfe_banner(); drfe_help(); return 0;
   }
 
 #ifdef _SDEBUG
-  int i;
   for (i = 0; i < argc; i++) {
 	printf("# say: argv[%i]=%s\n", i, argv[i]);
   }
@@ -449,7 +436,7 @@ int say(int argc, char *argv[])
 #endif
 	} else {
 	  /* TOFIX */
-	  help();
+	  drfe_help();
 	}
   }
 

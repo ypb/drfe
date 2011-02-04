@@ -1,3 +1,4 @@
 *.o
 /.drfe/
 /drfe
+/version.h
